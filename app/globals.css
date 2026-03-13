@@ -1,26 +1,266 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #07111f;
+  --background-deep: #040a14;
+  --surface: rgba(9, 19, 35, 0.78);
+  --surface-strong: rgba(7, 16, 29, 0.94);
+  --surface-soft: rgba(255, 255, 255, 0.04);
+  --line: rgba(148, 163, 184, 0.16);
+  --line-strong: rgba(94, 234, 212, 0.34);
+  --primary: #4f8cff;
+  --primary-strong: #2563eb;
+  --accent: #67f2ff;
+  --accent-strong: #1dd6ee;
+  --accent-warm: #ffbe72;
+  --text: #f8fbff;
+  --muted: rgba(226, 232, 240, 0.74);
+  --shadow-lg: 0 30px 80px rgba(1, 6, 19, 0.52);
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-foreground: var(--text);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(79, 140, 255, 0.24), transparent 32%),
+    radial-gradient(circle at 84% 10%, rgba(103, 242, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, #08111f 0%, #07101d 45%, #040a14 100%);
+  color: var(--text);
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before,
+body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+body::before {
+  background-image:
+    linear-gradient(rgba(125, 211, 252, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 211, 252, 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black 30%, transparent 82%);
+  opacity: 0.42;
+}
+
+body::after {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 190, 114, 0.07), transparent 26%),
+    radial-gradient(circle at 18% 76%, rgba(79, 140, 255, 0.08), transparent 24%),
+    radial-gradient(circle at 84% 74%, rgba(103, 242, 255, 0.08), transparent 26%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: -0.035em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(79, 140, 255, 0.4);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.surface-card {
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(12, 24, 41, 0.9) 0%, rgba(7, 16, 29, 0.82) 100%),
+    rgba(255, 255, 255, 0.02);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(22px);
+}
+
+.surface-card-soft {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(18px);
+}
+
+.brand-button {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 62%, #10369a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 18px 40px rgba(37, 99, 235, 0.28);
+}
+
+.brand-button:hover {
+  filter: brightness(1.05);
+}
+
+.ghost-button {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.section-kicker {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.section-copy {
+  color: var(--muted);
+}
+
+.brand-wordmark {
+  align-items: baseline;
+  display: inline-flex;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(79, 140, 255, 0.15);
+}
+
+.brand-wordmark[data-size="sm"] {
+  font-size: 0.9rem;
+}
+
+.brand-wordmark[data-size="md"] {
+  font-size: 1.05rem;
+}
+
+.brand-wordmark[data-size="lg"] {
+  font-size: clamp(1.75rem, 2vw + 1rem, 2.5rem);
+}
+
+.brand-wordmark[data-size="xl"] {
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  letter-spacing: 0.14em;
+  line-height: 0.94;
+}
+
+.brand-wordmark-core {
+  color: #f8fbff;
+}
+
+.brand-wordmark-accent {
+  color: var(--accent);
+  margin-left: 0.22em;
+  position: relative;
+}
+
+.brand-wordmark-accent::after {
+  background: linear-gradient(90deg, rgba(103, 242, 255, 0), rgba(103, 242, 255, 0.72), rgba(103, 242, 255, 0));
+  content: "";
+  height: 1px;
+  left: -0.05em;
+  position: absolute;
+  right: -0.08em;
+  top: 100%;
+}
+
+.page-shell {
+  min-height: 100vh;
+  position: relative;
+}
+
+.page-shell::before {
+  background:
+    radial-gradient(circle at top, rgba(79, 140, 255, 0.1), transparent 32%),
+    radial-gradient(circle at 80% 22%, rgba(103, 242, 255, 0.08), transparent 20%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.input-shell {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.input-shell::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.input-shell:focus {
+  background: rgba(255, 255, 255, 0.065);
+  border-color: rgba(79, 140, 255, 0.75);
+  box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.12);
+  outline: none;
+}
+
+.ambient-divider {
+  background: linear-gradient(90deg, transparent, rgba(103, 242, 255, 0.55), transparent);
+  height: 1px;
+  width: 100%;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+@keyframes float-shift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+.float-panel {
+  animation: float-shift 8s ease-in-out infinite;
 }
