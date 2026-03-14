@@ -113,14 +113,16 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
       : []),
   ]
   const verifiedCount = filtered.filter((listing) => listing.seller.verified).length
-  const averagePrice =
-    filtered.length > 0
-      ? Math.round(filtered.reduce((sum, listing) => sum + listing.price, 0) / filtered.length)
-      : 0
-  const highestWatchCount = filtered.reduce(
-    (max, listing) => Math.max(max, listing.watchers ?? 0),
-    0
-  )
+  const lowestPrice =
+    filtered.length > 0 ? filtered.reduce((min, listing) => Math.min(min, listing.price), filtered[0].price) : 0
+  const highestPrice =
+    filtered.length > 0 ? filtered.reduce((max, listing) => Math.max(max, listing.price), filtered[0].price) : 0
+  const priceRangeLabel =
+    filtered.length === 0
+      ? 'No data'
+      : lowestPrice === highestPrice
+        ? formatPrice(lowestPrice)
+        : `${formatPrice(lowestPrice)} - ${formatPrice(highestPrice)}`
   const hasActiveFilters = activeFilters.length > 0
   const quickBrowseCategories = MARKETPLACE_CATEGORIES.filter((value) => value !== 'Other')
 
@@ -135,12 +137,12 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                 <p className="section-kicker">Marketplace search</p>
                 <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
                   {activeCategoryLabel === 'All Categories'
-                    ? 'Browse live marketplace inventory'
+                    ? 'Browse current marketplace inventory'
                     : `${activeCategoryLabel} listings`}
                 </h1>
                 <p className="section-copy mt-3 max-w-3xl text-sm leading-relaxed sm:text-base">
-                  Search verified inventory, narrow by condition, and surface the listings worth
-                  watching before you commit.
+                  Search live inventory, narrow by condition, and compare the details that matter
+                  before you buy.
                 </p>
 
                 <SearchBar
@@ -203,15 +205,9 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                   <p className="mt-1 text-sm text-white/58">Seller-verified listings in scope</p>
                 </div>
                 <div className="surface-card-soft rounded-[1.5rem] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/42">
-                    Market signal
-                  </p>
-                  <p className="mt-3 text-2xl font-semibold text-white">
-                    {filtered.length > 0 ? formatPrice(averagePrice) : 'No data'}
-                  </p>
-                  <p className="mt-1 text-sm text-white/58">
-                    Average ask{highestWatchCount > 0 ? ` - top watchlist ${highestWatchCount}` : ''}
-                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/42">Price range</p>
+                  <p className="mt-3 text-2xl font-semibold text-white">{priceRangeLabel}</p>
+                  <p className="mt-1 text-sm text-white/58">Across the listings in this view</p>
                 </div>
               </div>
             </div>
@@ -301,7 +297,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
 
                 <div className="mt-6 rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-white/42">
-                    Need more confidence?
+                    Need help before you buy?
                   </p>
                   <div className="mt-3 flex flex-col gap-2">
                     <Link
@@ -309,6 +305,12 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                       className="text-sm text-white/68 transition-colors hover:text-white"
                     >
                       Read buyer protection
+                    </Link>
+                    <Link
+                      href="/contact-support"
+                      className="text-sm text-white/68 transition-colors hover:text-white"
+                    >
+                      Contact support
                     </Link>
                     <Link
                       href="/seller-standards"
@@ -359,7 +361,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                   <p className="text-sm text-white/52">
                     {hasActiveFilters
                       ? 'Try adjusting your search or clearing filters to widen the marketplace view.'
-                      : 'There are no published listings yet. Sellers can publish the first device now.'}
+                      : 'There are no published listings yet. TekSwapp is new, so sellers can publish the first device now.'}
                   </p>
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                     <Link

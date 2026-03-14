@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Footer from '@/components/footer'
 import Navbar from '@/components/navbar'
+import { getAllowedShippingCountries, resolveShippingRate } from '@/lib/checkout'
 import { normalizeImageSrc } from '@/lib/image-src'
 import { getMarketplaceListingById } from '@/lib/marketplace'
 import { formatDate, formatPrice } from '@/lib/utils'
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   const title = `${listing.title} | TekSwapp`
-  const description = `Shop ${listing.condition.toLowerCase()} ${listing.title} on TekSwapp for ${formatPrice(listing.price)} with verified marketplace protections.`
+  const description = `Shop ${listing.condition.toLowerCase()} ${listing.title} on TekSwapp for ${formatPrice(listing.price, listing.currencyCode)} with clear listing details and seller information.`
 
   return {
     title,
@@ -82,6 +83,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const imageSrc = normalizeImageSrc(listing.image)
+  const shippingChoices = getAllowedShippingCountries(listing)
+    .map((code) => resolveShippingRate(listing, code))
+    .filter((rate): rate is NonNullable<ReturnType<typeof resolveShippingRate>> => Boolean(rate))
+  const cheapestShipping =
+    shippingChoices.length > 0
+      ? shippingChoices.reduce((lowest, rate) => Math.min(lowest, rate.amount), shippingChoices[0].amount)
+      : null
+  const checkoutReady = shippingChoices.length > 0
+  const sellerSaleLabel = listing.seller.totalSales === 1 ? 'sale' : 'sales'
+  const sellerSummary =
+    listing.seller.rating > 0 && listing.seller.totalSales > 0
+      ? `${listing.seller.rating.toFixed(1)} rating and ${listing.seller.totalSales} completed ${sellerSaleLabel}`
+      : listing.seller.rating > 0
+        ? `${listing.seller.rating.toFixed(1)} seller rating`
+        : listing.seller.totalSales > 0
+          ? `${listing.seller.totalSales} completed ${sellerSaleLabel}`
+          : listing.seller.verified
+            ? 'Verified seller with a new public history on TekSwapp'
+            : 'New seller on TekSwapp'
+  const buyerChecklist = [
+    'Review the condition, specs, and seller notes before checkout.',
+    'Check buyer protection if you want more detail on how order issues are handled.',
+    'Use contact support if you need help before placing an order.',
+  ]
 
   const baseSpecs: { label: string; value: string }[] = [
     { label: 'Brand', value: listing.brand },
@@ -92,7 +117,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     ...(listing.batteryHealth ? [{ label: 'Battery Health', value: `${listing.batteryHealth}%` }] : []),
     ...(listing.color ? [{ label: 'Color', value: listing.color }] : []),
     { label: 'Listed', value: formatDate(listing.createdAt) },
-    { label: 'Views', value: `${listing.views ?? 0}` },
+    ...(listing.views && listing.views > 0 ? [{ label: 'Views', value: `${listing.views}` }] : []),
+    ...(listing.watchers && listing.watchers > 0
+      ? [{ label: 'Watching', value: `${listing.watchers}` }]
+      : []),
   ]
 
   const dynamicSpecs = Object.entries(listing.deviceSpecs ?? {})
@@ -166,12 +194,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
 
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-white">{formatPrice(listing.price)}</span>
+                <span className="text-4xl font-bold text-white">{formatPrice(listing.price, listing.currencyCode)}</span>
                 {listing.originalPrice && (
                   <span className="text-lg text-white/30 line-through">
-                    {formatPrice(listing.originalPrice)}
+                    {formatPrice(listing.originalPrice, listing.currencyCode)}
                   </span>
                 )}
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(79,140,255,0.14),rgba(103,242,255,0.08))] p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-[#67F2FF]">Checkout details</p>
+                    <p className="mt-2 text-sm text-white/78">
+                      {checkoutReady
+                        ? cheapestShipping !== null
+                          ? `Shipping starts at ${formatPrice(cheapestShipping, listing.currencyCode)} and tax is calculated by Stripe from the buyer address.`
+                          : 'Shipping and tax are calculated during checkout.'
+                        : 'Seller shipping is not configured yet, so secure checkout is currently unavailable.'}
+                    </p>
+                  </div>
+                  <p className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-xs text-white/70">
+                    Local currency shown in Stripe when supported
+                  </p>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -187,15 +233,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
+                {checkoutReady ? (
+                  <Link
+                    href={`/checkout/${listing.id}`}
+                    className="flex-1 rounded-xl bg-[#2563EB] px-6 py-4 text-center text-sm font-bold text-white transition-all hover:bg-blue-500"
+                  >
+                    Buy with secure checkout - {formatPrice(listing.price, listing.currencyCode)}
+                  </Link>
+                ) : (
+                  <span className="flex-1 rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-center text-sm font-bold text-white/55">
+                    Shipping not configured yet
+                  </span>
+                )}
                 <Link
-                  href="/auth"
-                  className="flex-1 rounded-xl bg-[#2563EB] px-6 py-4 text-center text-sm font-bold text-white transition-all hover:bg-blue-500"
+                  href="/how-it-works"
+                  className="flex-1 rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-center text-sm font-semibold text-white transition-all hover:border-white/20 hover:bg-white/10"
                 >
-                  Buy Now - {formatPrice(listing.price)}
+                  Checkout details
                 </Link>
-                <button className="flex-1 rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-sm font-semibold text-white transition-all hover:border-white/20 hover:bg-white/10">
-                  Save to Watchlist
-                </button>
               </div>
 
               <div className="rounded-2xl border border-white/8 bg-white/[0.08] p-5 backdrop-blur-sm">
@@ -213,9 +268,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-white">{listing.seller.name}</div>
-                    <div className="mt-0.5 text-xs text-white/40">
-                      {listing.seller.rating.toFixed(1)} rating - {listing.seller.totalSales} sales
-                    </div>
+                    <div className="mt-0.5 text-xs text-white/40">{sellerSummary}</div>
                   </div>
                 </div>
                 {listing.sellerNotes && (
@@ -223,6 +276,45 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     <p className="text-xs italic text-white/40">&quot;{listing.sellerNotes}&quot;</p>
                   </div>
                 )}
+              </div>
+
+              <div className="rounded-2xl border border-white/8 bg-white/[0.08] p-5 backdrop-blur-sm">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
+                  Before you buy
+                </p>
+                <div className="mt-4 space-y-3">
+                  {buyerChecklist.map((item, index) => (
+                    <div
+                      key={item}
+                      className="rounded-xl border border-white/8 bg-white/[0.05] px-4 py-3"
+                    >
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-[#67F2FF]">
+                        0{index + 1}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-white/68">{item}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Link
+                    href="/buyer-protection"
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/78 transition-colors hover:text-white"
+                  >
+                    Buyer protection
+                  </Link>
+                  <Link
+                    href="/how-it-works"
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/78 transition-colors hover:text-white"
+                  >
+                    How it works
+                  </Link>
+                  <Link
+                    href="/contact-support"
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/78 transition-colors hover:text-white"
+                  >
+                    Contact support
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

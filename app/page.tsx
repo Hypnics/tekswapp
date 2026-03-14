@@ -20,7 +20,7 @@ export default function HomePage() {
         '@type': 'Organization',
         name: 'TekSwapp',
         url: siteUrl,
-        description: 'Verified marketplace for premium second-hand electronics.',
+        description: 'Marketplace for buying and selling used electronics with clearer listings.',
       },
       {
         '@type': 'WebSite',

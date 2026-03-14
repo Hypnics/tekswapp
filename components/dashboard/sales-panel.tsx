@@ -23,6 +23,9 @@ export default function SalesPanel({ sales }: SalesPanelProps) {
   const pendingShipment = sales.filter((sale) => sale.shippingStatus !== 'delivered').length
   const heldPayouts = sales.filter((sale) => sale.payoutStatus !== 'released').length
   const deliveredOrders = sales.filter((sale) => sale.shippingStatus === 'delivered').length
+  const currencies = new Set(sales.map((sale) => sale.currencyCode))
+  const grossSalesLabel =
+    currencies.size === 1 ? formatPrice(grossSales, sales[0].currencyCode) : 'Multi-currency'
 
   if (sales.length === 0) {
     return (
@@ -48,7 +51,7 @@ export default function SalesPanel({ sales }: SalesPanelProps) {
       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
           <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">Gross sales</p>
-          <p className="mt-2 text-2xl font-semibold text-white">{formatPrice(grossSales, 'USD')}</p>
+          <p className="mt-2 text-2xl font-semibold text-white">{grossSalesLabel}</p>
         </div>
         <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
           <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">Need shipping</p>
@@ -109,7 +112,7 @@ export default function SalesPanel({ sales }: SalesPanelProps) {
                     {payoutStyles[sale.payoutStatus].label}
                   </span>
                 </td>
-                <td className="px-3 py-3 text-sm font-semibold text-white">{formatPrice(sale.amount, 'USD')}</td>
+                <td className="px-3 py-3 text-sm font-semibold text-white">{formatPrice(sale.amount, sale.currencyCode)}</td>
                 <td className="rounded-r-2xl px-3 py-3 text-sm text-white/65">{formatDate(sale.soldAt)}</td>
               </tr>
             ))}

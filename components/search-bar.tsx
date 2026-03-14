@@ -86,7 +86,7 @@ export default function SearchBar({
             </div>
             <div className="min-w-0 flex-1">
               <div className="mb-1 text-[10px] uppercase tracking-[0.22em] text-white/38">
-                Search verified inventory
+                Search phones, laptops, and more
               </div>
               <input
                 type="text"
@@ -94,7 +94,7 @@ export default function SearchBar({
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                placeholder="iPhone 15 Pro, MacBook Air M3, PS5 Slim..."
+                placeholder="Search by brand, model, or device..."
                 className="h-8 w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40 sm:text-[15px]"
               />
             </div>
@@ -130,7 +130,7 @@ export default function SearchBar({
 
       {showSuggestions ? (
         <div className="mt-4 flex flex-wrap items-center gap-2.5">
-          <span className="text-[11px] uppercase tracking-[0.2em] text-white/38">Popular now</span>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-white/38">Try a search</span>
           {suggestions.map((term) => (
             <button
               key={term}

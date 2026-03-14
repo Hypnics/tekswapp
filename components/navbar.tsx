@@ -7,10 +7,10 @@ import BrandMark from '@/components/brand-mark'
 import { createClient } from '@/lib/supabase/client'
 
 const desktopLinks = [
-  { label: 'Marketplace', href: '/listings' },
+  { label: 'Shop', href: '/listings' },
   { label: 'Sell', href: '/sell' },
+  { label: 'Buyer Protection', href: '/buyer-protection' },
   { label: 'How It Works', href: '/how-it-works' },
-  { label: 'Standards', href: '/seller-standards' },
 ]
 
 export default function Navbar() {
@@ -74,12 +74,7 @@ export default function Navbar() {
     <nav className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-4">
       <div className="mx-auto max-w-7xl rounded-[1.6rem] border border-white/10 bg-[rgba(15,35,62,0.68)] px-4 shadow-[0_16px_50px_rgba(6,14,31,0.18)] backdrop-blur-2xl sm:px-6">
         <div className="flex h-[72px] items-center justify-between gap-4">
-          <BrandMark
-            href="/"
-            size="md"
-            subtitle="Verified Tech Exchange"
-            className="shrink-0"
-          />
+          <BrandMark href="/" size="md" subtitle="Buy & Sell Used Tech" className="shrink-0" />
 
           <div className="hidden min-w-0 items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1 md:flex">
             {desktopLinks.map((link) => (
@@ -94,9 +89,6 @@ export default function Navbar() {
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
-            <div className="rounded-full border border-emerald-400/18 bg-emerald-400/8 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-emerald-200/78">
-              IMEI-ready
-            </div>
             {showAuthedActions ? (
               <>
                 <Link
@@ -161,10 +153,10 @@ export default function Navbar() {
           <div className="border-t border-white/8 pb-5 pt-4 md:hidden">
             <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
-                Verified tech exchange
+                Buying made simpler
               </p>
               <p className="mt-2 text-sm leading-relaxed text-white/72">
-                Cleaner listings, protected payouts, and buyer confidence built into the flow.
+                Clearer listings, visible seller info, and support pages that are easy to reach.
               </p>
             </div>
 

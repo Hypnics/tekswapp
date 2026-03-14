@@ -24,6 +24,28 @@ export default function ListingCard({ listing }: ListingCardProps) {
     color: '#FFFFFF',
     background: 'rgba(255,255,255,0.08)',
   }
+  const sellerSaleLabel = listing.seller.totalSales === 1 ? 'sale' : 'sales'
+  const sellerSummary =
+    listing.seller.rating > 0 && listing.seller.totalSales > 0
+      ? `${listing.seller.rating.toFixed(1)} rating | ${listing.seller.totalSales} ${sellerSaleLabel}`
+      : listing.seller.rating > 0
+        ? `${listing.seller.rating.toFixed(1)} seller rating`
+        : listing.seller.totalSales > 0
+          ? `${listing.seller.totalSales} completed ${sellerSaleLabel}`
+          : listing.seller.verified
+            ? 'Verified seller profile'
+            : 'New seller on TekSwapp'
+  const quickSpecs = [
+    listing.storage,
+    listing.color,
+    listing.batteryHealth ? `${listing.batteryHealth}% battery` : undefined,
+  ].filter(Boolean) as string[]
+  const engagementLabel =
+    listing.watchers && listing.watchers > 0
+      ? `${listing.watchers} watching`
+      : listing.views && listing.views > 0
+        ? `${listing.views} views`
+        : 'New listing'
 
   return (
     <Link
@@ -77,13 +99,26 @@ export default function ListingCard({ listing }: ListingCardProps) {
             {listing.category}
           </span>
           <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/54">
-            {listing.views} views
+            {engagementLabel}
           </span>
         </div>
 
         <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug text-white">
           {listing.title}
         </h3>
+
+        {quickSpecs.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {quickSpecs.slice(0, 3).map((spec) => (
+              <span
+                key={spec}
+                className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/58"
+              >
+                {spec}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         <div className="flex items-end gap-2">
           <p className="text-2xl font-semibold text-white">{formatPrice(listing.price)}</p>
@@ -92,9 +127,14 @@ export default function ListingCard({ listing }: ListingCardProps) {
           )}
         </div>
 
-        <div className="flex items-center justify-between border-t border-white/8 pt-4 text-sm text-white/70">
-          <span className="truncate pr-2">{listing.seller.name}</span>
-          <span className="whitespace-nowrap">{listing.seller.rating.toFixed(1)} seller rating</span>
+        <div className="border-t border-white/8 pt-4">
+          <div className="flex items-center justify-between gap-3 text-sm text-white/70">
+            <span className="truncate pr-2">{listing.seller.name}</span>
+            {listing.seller.verified ? (
+              <span className="whitespace-nowrap text-xs text-[#67F2FF]">Verified</span>
+            ) : null}
+          </div>
+          <p className="mt-1 text-xs text-white/48">{sellerSummary}</p>
         </div>
       </div>
     </Link>

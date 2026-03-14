@@ -10,13 +10,13 @@ export default async function FeaturedListings() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="section-kicker">Featured listings</p>
+            <p className="section-kicker">Fresh listings</p>
             <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Fresh inventory from the live marketplace
+              Start with the newest devices on TekSwapp
             </h2>
             <p className="section-copy mt-3 text-sm leading-relaxed sm:text-base">
-              Curated devices from verified sellers with stronger pricing signals, condition
-              detail, and protected checkout paths.
+              Open any listing to compare specs, condition, seller details, and pricing without
+              digging through cluttered copy.
             </p>
           </div>
           <Link href="/listings" className="text-sm text-white/68 transition-colors hover:text-white">
@@ -32,7 +32,9 @@ export default async function FeaturedListings() {
           </div>
         ) : (
           <div className="surface-card rounded-[1.85rem] p-8 text-center">
-            <p className="text-sm text-white/70">No seller listings have been published yet.</p>
+            <p className="text-sm text-white/70">
+              No listings are live yet. TekSwapp is just getting started.
+            </p>
             <Link href="/sell" className="mt-3 inline-flex text-sm font-semibold text-[#67F2FF] hover:text-white">
               Publish the first listing
             </Link>

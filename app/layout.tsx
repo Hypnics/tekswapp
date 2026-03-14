@@ -19,10 +19,10 @@ const siteUrl = getSiteUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'TekSwapp | Verified Tech Marketplace',
+  title: 'TekSwapp | Buy & Sell Used Tech',
   description:
-    'TekSwapp is the verified tech marketplace for premium resale. Buy and sell phones, laptops, tablets, and consoles with protected payments.',
-  keywords: ['electronics marketplace', 'buy phone', 'sell laptop', 'verified tech', 'IMEI check'],
+    'Buy and sell used phones, laptops, tablets, consoles, and more on TekSwapp. Shop clearer listings, visible seller info, and a simpler checkout flow.',
+  keywords: ['electronics marketplace', 'buy used phone', 'sell laptop', 'used tech', 'verified sellers'],
   applicationName: 'TekSwapp',
   alternates: {
     canonical: '/',
@@ -32,18 +32,27 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: 'TekSwapp | Verified Tech Marketplace',
+    title: 'TekSwapp | Buy & Sell Used Tech',
     description:
-      'Buy and sell premium electronics with verified sellers, protected checkout, and cleaner listings.',
+      'Shop used tech with clearer listings, visible seller info, and a simpler path to checkout.',
     siteName: 'TekSwapp',
     type: 'website',
     url: siteUrl,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TekSwapp | Verified Tech Marketplace',
+    title: 'TekSwapp | Buy & Sell Used Tech',
     description:
-      'Buy and sell premium electronics with verified sellers, protected checkout, and cleaner listings.',
+      'Shop used tech with clearer listings, visible seller info, and a simpler path to checkout.',
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico?v=2', sizes: 'any' },
+      { url: '/icon.png?v=2', type: 'image/png', sizes: '256x256' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: ['/favicon.ico?v=2'],
+    apple: [{ url: '/apple-icon.png?v=2', sizes: '180x180', type: 'image/png' }],
   },
 }
 

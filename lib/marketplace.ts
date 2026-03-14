@@ -8,8 +8,9 @@ import {
   normalizeSortFilter,
   normalizeVerifiedFilter,
 } from '@/lib/marketplace-config'
+import { DEFAULT_CURRENCY, normalizeShippingProfile } from '@/lib/checkout'
 import { normalizeImageSrc } from '@/lib/image-src'
-import { Category, Condition, Listing } from '@/types/listing'
+import { Category, Condition, CurrencyCode, Listing, ShippingMode } from '@/types/listing'
 
 type ListingStatus = 'active' | 'draft' | 'sold' | 'pending_review' | 'paused'
 
@@ -26,6 +27,7 @@ const LISTING_COLUMNS = `
   model,
   price,
   original_price,
+  currency_code,
   condition,
   storage,
   battery_health,
@@ -37,6 +39,8 @@ const LISTING_COLUMNS = `
   imei_status,
   seller_notes,
   device_specs,
+  shipping_mode,
+  shipping_profile,
   status,
   views,
   watchers,
@@ -66,6 +70,16 @@ function normalizeCategory(value: unknown): Category {
 
 function normalizeCondition(value: unknown): Condition {
   return LISTING_CONDITIONS.includes(value as Condition) ? (value as Condition) : 'Good'
+}
+
+function normalizeCurrencyCode(value: unknown): CurrencyCode {
+  if (typeof value === 'string' && value.trim().toUpperCase() === 'USD') return 'USD'
+  return DEFAULT_CURRENCY
+}
+
+function normalizeShippingMode(value: unknown): ShippingMode {
+  const modes: ShippingMode[] = ['none', 'basic', 'advanced']
+  return modes.includes(value as ShippingMode) ? (value as ShippingMode) : 'none'
 }
 
 function normalizeListingStatus(value: unknown): ListingStatus {
@@ -121,7 +135,7 @@ function mapRowToListing(row: Record<string, unknown>): Listing {
     seller: {
       id: asString(row.seller_id, 'unknown-seller'),
       name: sellerName,
-      rating: asNumber(row.seller_rating, 5),
+      rating: asNumber(row.seller_rating, 0),
       totalSales: asNumber(row.seller_total_sales, 0),
       verified: sellerVerified,
       joinedDate: asString(row.created_at, new Date().toISOString()),
@@ -135,6 +149,9 @@ function mapRowToListing(row: Record<string, unknown>): Listing {
     watchers: asNumber(row.watchers, 0),
     status: normalizeListingStatus(row.status),
     deviceSpecs: specs,
+    currencyCode: normalizeCurrencyCode(row.currency_code),
+    shippingMode: normalizeShippingMode(row.shipping_mode),
+    shippingProfile: normalizeShippingProfile(row.shipping_profile),
   }
 }
 

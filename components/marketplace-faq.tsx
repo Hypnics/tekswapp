@@ -2,33 +2,33 @@ import Link from 'next/link'
 
 const faqs = [
   {
-    question: 'How does TekSwapp decide who can publish listings?',
+    question: 'Is TekSwapp a new marketplace?',
     answer:
-      'Seller publishing is tied to profile completion and verification readiness, which helps keep incomplete or low-trust accounts from going live too early.',
-    tag: 'Seller access',
+      'Yes. TekSwapp is early, so the experience is focused on making listings honest, easy to compare, and backed by clear support pages instead of inflated marketplace claims.',
+    tag: 'Getting started',
   },
   {
-    question: 'When does seller payout get released?',
+    question: 'What should I check before buying a device?',
     answer:
-      'The marketplace flow is designed around protected checkout, tracked delivery, and review checkpoints before payout moves forward.',
-    tag: 'Payouts',
+      'Start with the condition, storage, battery health when available, seller notes, and whether the seller is verified. Those details are meant to be visible before checkout.',
+    tag: 'Buying',
   },
   {
-    question: 'What does a verified seller actually mean here?',
+    question: 'What does a verified seller mean on TekSwapp?',
     answer:
-      'Verification combines identity, profile, and marketplace readiness signals so buyers can separate stronger sellers from anonymous inventory noise.',
+      'It means the seller has completed the marketplace checks currently required for a verified profile. It is meant to give buyers more context, not replace reading the listing itself.',
     tag: 'Trust',
   },
   {
-    question: 'Can buyers filter by device condition and seller confidence?',
+    question: 'Why do some sellers have little or no rating history yet?',
     answer:
-      'Yes. The listings experience now supports condition filters, verified-only browsing, category filters, and sort modes so discovery feels less random.',
-    tag: 'Browsing',
+      'Because the marketplace is new and some sellers are new too. TekSwapp should only show seller history that actually exists, which is why some profiles will appear as new instead of carrying made-up scores.',
+    tag: 'Honesty',
   },
   {
     question: 'What should buyers do if something goes wrong with an order?',
     answer:
-      'Support, buyer protection, and seller standards pages are linked directly from the storefront so users can understand the next step without hunting for policy pages.',
+      'Buyer protection, seller standards, and contact support pages are linked directly from the storefront so users can understand the next step without hunting for help.',
     tag: 'Support',
   },
 ]
@@ -46,13 +46,13 @@ export default function MarketplaceFaq() {
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="surface-card rounded-[2rem] p-6 sm:p-8">
           <div className="max-w-3xl">
-            <p className="section-kicker">Questions buyers and sellers ask first</p>
+            <p className="section-kicker">Questions shoppers ask first</p>
             <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Marketplace clarity matters
+              Clear answers build trust
             </h2>
             <p className="section-copy mt-3 text-sm leading-relaxed sm:text-base">
-              A stronger marketplace is not just better visuals. It also answers the questions
-              that usually stop a purchase or delay a listing.
+              A better shopping experience is not just design. It also means answering the basic
+              questions that usually stop a buyer from moving forward.
             </p>
           </div>
 
@@ -79,8 +79,8 @@ export default function MarketplaceFaq() {
         <aside className="surface-card rounded-[2rem] p-6">
           <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Need a policy page?</p>
           <p className="mt-4 text-sm leading-relaxed text-white/68">
-            The support and trust surface is more useful when users can jump straight to the right
-            page instead of leaving the marketplace confused.
+            If you want more detail before buying, the important pages are linked here without
+            sending you on a hunt through the site.
           </p>
 
           <div className="mt-6 space-y-3">

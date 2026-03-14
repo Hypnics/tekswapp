@@ -17,6 +17,9 @@ export default function PurchasesPanel({ purchases }: PurchasesPanelProps) {
   const inTransit = purchases.filter((purchase) => purchase.status !== 'delivered').length
   const delivered = purchases.filter((purchase) => purchase.status === 'delivered').length
   const trackingPending = purchases.filter((purchase) => !purchase.trackingCode).length
+  const currencies = new Set(purchases.map((purchase) => purchase.currencyCode))
+  const totalSpendLabel =
+    currencies.size === 1 ? formatPrice(totalSpend, purchases[0].currencyCode) : 'Multi-currency'
 
   if (purchases.length === 0) {
     return (
@@ -40,7 +43,7 @@ export default function PurchasesPanel({ purchases }: PurchasesPanelProps) {
       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
           <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">Total spend</p>
-          <p className="mt-2 text-2xl font-semibold text-white">{formatPrice(totalSpend, 'USD')}</p>
+          <p className="mt-2 text-2xl font-semibold text-white">{totalSpendLabel}</p>
         </div>
         <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
           <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">On the way</p>
@@ -91,7 +94,7 @@ export default function PurchasesPanel({ purchases }: PurchasesPanelProps) {
                   {purchase.trackingCode || 'Tracking pending'}
                 </td>
                 <td className="px-3 py-3 text-sm font-semibold text-white">
-                  {formatPrice(purchase.amount, 'USD')}
+                  {formatPrice(purchase.amount, purchase.currencyCode)}
                 </td>
                 <td className="rounded-r-2xl px-3 py-3 text-sm text-white/65">
                   {formatDate(purchase.purchasedAt)}

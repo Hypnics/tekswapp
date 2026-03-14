@@ -1,27 +1,27 @@
 const steps = [
   {
     number: '01',
-    title: 'List the device',
+    title: 'Find the right listing',
     description:
-      'Publish photos, condition notes, storage, and included accessories so buyers see the full picture up front.',
+      'Search by brand, model, or category and narrow down results with condition and verified-seller filters.',
   },
   {
     number: '02',
-    title: 'Buyer checks out',
+    title: 'Review the details',
     description:
-      'Payment is captured through a protected flow and held while the order moves through the delivery stage.',
+      'Check the condition, specs, seller notes, and seller profile before you move ahead.',
   },
   {
     number: '03',
-    title: 'Ship with tracking',
+    title: 'Checkout through TekSwapp',
     description:
-      'Tracked delivery keeps both sides aligned and gives support a cleaner signal if something goes sideways.',
+      'The marketplace flow is designed around protected checkout and tracked shipping so the order stays visible.',
   },
   {
     number: '04',
-    title: 'Payout is released',
+    title: 'Track the order',
     description:
-      'Once delivery conditions are met, the seller receives payout according to platform policy and review rules.',
+      'If anything feels off, buyer protection and support pages are already linked into the experience.',
   },
 ]
 
@@ -32,11 +32,11 @@ export default function HowItWorks() {
         <div className="mb-8 max-w-3xl">
           <p className="section-kicker">How it works</p>
           <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-            A transaction flow that keeps both sides aligned
+            Shopping on TekSwapp in four steps
           </h2>
           <p className="section-copy mt-3 text-sm leading-relaxed sm:text-base">
-            TekSwapp is opinionated about the order lifecycle so devices do not move through a
-            vague, trust-me marketplace experience.
+            The buying flow is designed to feel straightforward: find a device, review the
+            details, checkout, and stay informed as the order moves.
           </p>
         </div>
 

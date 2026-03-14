@@ -45,12 +45,17 @@ export default function OverviewPanel({
   const openSales = snapshot.sales.filter((sale) => sale.shippingStatus !== 'delivered').length
   const incomingPurchases = snapshot.purchases.filter((purchase) => purchase.status !== 'delivered').length
   const averageOrderValue = snapshot.sales.length > 0 ? Math.round(grossSales / snapshot.sales.length) : 0
+  const saleCurrencies = new Set(snapshot.sales.map((sale) => sale.currencyCode))
+  const grossSalesLabel =
+    snapshot.sales.length === 0 ? '$0' : saleCurrencies.size === 1 ? formatPrice(grossSales, snapshot.sales[0].currencyCode) : 'Multi-currency'
+  const averageOrderLabel =
+    snapshot.sales.length === 0 ? '$0' : saleCurrencies.size === 1 ? formatPrice(averageOrderValue, snapshot.sales[0].currencyCode) : 'Multi-currency'
   const profileComplete = hasRequiredSellerFields(snapshot.profile)
 
   const stats = [
     {
       label: 'Gross sales',
-      value: formatPrice(grossSales, 'USD'),
+      value: grossSalesLabel,
       note: snapshot.sales.length > 0 ? `${snapshot.sales.length} completed orders` : 'Waiting for first sale',
     },
     {
@@ -60,7 +65,7 @@ export default function OverviewPanel({
     },
     {
       label: 'Average order',
-      value: snapshot.sales.length > 0 ? formatPrice(averageOrderValue, 'USD') : '$0',
+      value: averageOrderLabel,
       note: openSales > 0 ? `${openSales} orders still moving` : 'No shipping backlog',
     },
     {
@@ -256,7 +261,7 @@ export default function OverviewPanel({
                         {sale.orderNumber} / {sale.buyerName} / {formatDate(sale.soldAt)}
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-white">{formatPrice(sale.amount, 'USD')}</p>
+                    <p className="text-sm font-semibold text-white">{formatPrice(sale.amount, sale.currencyCode)}</p>
                   </div>
                 </div>
               ))

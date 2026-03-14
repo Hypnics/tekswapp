@@ -163,7 +163,7 @@ async function loadListings(supabase: SupabaseClient, userId: string): Promise<D
 async function loadSales(supabase: SupabaseClient, userId: string): Promise<SaleOrder[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('id,order_number,listing_title,buyer_name,buyer_handle,shipping_status,payout_status,total_amount,created_at')
+    .select('id,order_number,listing_title,buyer_name,buyer_handle,shipping_status,payout_status,total_amount,currency_code,created_at')
     .eq('seller_id', userId)
     .order('created_at', { ascending: false })
 
@@ -178,6 +178,7 @@ async function loadSales(supabase: SupabaseClient, userId: string): Promise<Sale
     shippingStatus: normalizeShippingStatus(row.shipping_status),
     payoutStatus: normalizePayoutStatus(row.payout_status),
     amount: asNumber(row.total_amount, 0),
+    currencyCode: asString(row.currency_code, 'USD'),
     soldAt: asString(row.created_at, new Date().toISOString()),
   }))
 }
@@ -185,7 +186,7 @@ async function loadSales(supabase: SupabaseClient, userId: string): Promise<Sale
 async function loadPurchases(supabase: SupabaseClient, userId: string): Promise<PurchaseOrder[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('id,order_number,item_title,seller_name,status,tracking_code,total_amount,created_at')
+    .select('id,order_number,item_title,seller_name,status,tracking_code,total_amount,currency_code,created_at')
     .eq('buyer_id', userId)
     .order('created_at', { ascending: false })
 
@@ -199,6 +200,7 @@ async function loadPurchases(supabase: SupabaseClient, userId: string): Promise<
     status: normalizePurchaseStatus(row.status),
     trackingCode: asString(row.tracking_code, ''),
     amount: asNumber(row.total_amount, 0),
+    currencyCode: asString(row.currency_code, 'USD'),
     purchasedAt: asString(row.created_at, new Date().toISOString()),
   }))
 }

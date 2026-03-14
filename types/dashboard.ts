@@ -55,6 +55,7 @@ export interface SaleOrder {
   shippingStatus: ShippingStatus
   payoutStatus: PayoutStatus
   amount: number
+  currencyCode: string
   soldAt: string
 }
 
@@ -66,6 +67,7 @@ export interface PurchaseOrder {
   status: PurchaseStatus
   trackingCode?: string
   amount: number
+  currencyCode: string
   purchasedAt: string
 }
 

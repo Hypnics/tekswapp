@@ -33,11 +33,11 @@ export default function SellerAdvantage() {
           <div className="max-w-3xl">
             <p className="section-kicker">Seller experience</p>
             <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              More than a listing form
+              Better listings help buyers too
             </h2>
             <p className="section-copy mt-3 text-sm leading-relaxed sm:text-base">
-              TekSwapp is starting to feel like a real operating layer for repeat sellers, with
-              clearer onboarding, stronger listing structure, and better visibility after launch.
+              Sellers get guided listing setup and clearer standards, which means buyers should
+              see better photos, cleaner specs, and fewer vague descriptions.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export default function SellerAdvantage() {
         </div>
 
         <aside className="surface-card rounded-[2rem] p-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Operator view</p>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Seller tools</p>
           <div className="mt-6 space-y-4">
             {operatorNotes.map((item) => (
               <div key={item.label} className="rounded-[1.4rem] border border-white/8 bg-white/[0.08] p-4">

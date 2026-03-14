@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { CATEGORY_SPEC_FIELDS, LISTING_CONDITIONS, MARKETPLACE_CATEGORIES } from '@/lib/marketplace-config'
 import { canUserPublishListings } from '@/lib/dashboard-data'
 import { getOrCreateProfile } from '@/lib/dashboard-server'
+import { DEFAULT_CURRENCY, parseShippingProfileFromForm } from '@/lib/checkout'
 import { isValidImageSrcInput, normalizeImageSrc } from '@/lib/image-src'
 import { createClient } from '@/lib/supabase/server'
 import { Category, Condition } from '@/types/listing'
@@ -162,6 +163,12 @@ export async function publishListing(
 
   const batteryHealth = parseNumber(deviceSpecs.battery_health ?? '')
   const imeiStatus = normalizeImeiStatus(deviceSpecs.imei_status ?? '')
+  const { shippingMode, shippingProfile, error: shippingError } = parseShippingProfileFromForm(formData)
+
+  if (shippingError) {
+    return { status: 'error', message: shippingError }
+  }
+
   const sellerName =
     profile.full_name ||
     (typeof user.user_metadata?.name === 'string' ? user.user_metadata.name : null) ||
@@ -191,6 +198,9 @@ export async function publishListing(
     imei_status: imeiStatus,
     seller_notes: sellerNotes || null,
     device_specs: deviceSpecs,
+    currency_code: DEFAULT_CURRENCY,
+    shipping_mode: shippingMode,
+    shipping_profile: shippingProfile ?? {},
     verified: sellerVerified,
     status: 'pending_review',
     views: 0,

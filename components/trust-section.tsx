@@ -2,20 +2,20 @@ import Link from 'next/link'
 
 const trustItems = [
   {
-    title: 'Fraud prevention',
-    text: 'Automated and manual review layers help flag suspicious listings, accounts, and off-pattern behavior earlier.',
+    title: 'Visible condition details',
+    text: 'Listings are expected to show the device basics up front so buyers are not guessing what is actually being sold.',
   },
   {
-    title: 'Condition standards',
-    text: "Sellers are pushed toward consistent grading and clearer descriptions, so buyers are not guessing what 'good' means.",
+    title: 'Seller status on the page',
+    text: 'Verified badges and seller history are shown on listings instead of being buried in another screen.',
   },
   {
-    title: 'Reputation visibility',
-    text: 'Ratings, completion history, and response performance are visible before a buyer commits to a purchase.',
+    title: 'Buyer protection links',
+    text: 'Customers can reach marketplace policies and support pages without leaving the shopping flow confused.',
   },
   {
-    title: 'Dispute operations',
-    text: 'Support workflows are designed around delivery issues, item mismatch reports, and payout-related investigation.',
+    title: 'Support when needed',
+    text: 'Order issues, delivery concerns, and policy questions already have a clear path instead of a hidden inbox.',
   },
 ]
 
@@ -27,8 +27,12 @@ export default function TrustSection() {
           <div className="mb-8 max-w-3xl">
             <p className="section-kicker">Trust and safety</p>
             <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Operational safeguards behind each order
+              Trust signals shoppers can actually use
             </h2>
+            <p className="section-copy mt-3 text-sm leading-relaxed sm:text-base">
+              Because TekSwapp is new, the site should be clear about what buyers can rely on
+              right now: cleaner listings, visible seller status, and easy-to-find support.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -66,12 +70,12 @@ export default function TrustSection() {
         </div>
 
         <aside className="surface-card rounded-[2rem] p-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Safety posture</p>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">Buying basics</p>
           <div className="mt-6 space-y-4">
             {[
-              { value: '24/7', label: 'Fraud review signals' },
-              { value: 'Escrow', label: 'Protected payment path' },
-              { value: 'Tracked', label: 'Delivery-first workflow' },
+              { value: 'Visible', label: 'Seller and listing details' },
+              { value: 'Linked', label: 'Buyer protection and support pages' },
+              { value: 'Tracked', label: 'Order flow built around shipping updates' },
             ].map((item) => (
               <div key={item.label} className="rounded-[1.4rem] border border-white/8 bg-white/[0.08] p-4">
                 <div className="text-2xl font-semibold text-white">{item.value}</div>
@@ -83,8 +87,8 @@ export default function TrustSection() {
           <div className="mt-6 rounded-[1.4rem] border border-white/8 bg-white/[0.08] p-4">
             <p className="text-[11px] uppercase tracking-[0.2em] text-white/42">Support lane</p>
             <p className="mt-3 text-sm leading-relaxed text-white/68">
-              Order issue, delivery mismatch, or payout question? The support flow is already
-              linked into the marketplace lifecycle.
+              Order issue, delivery mismatch, or a question before buying? The storefront keeps
+              the next step easy to find.
             </p>
           </div>
         </aside>

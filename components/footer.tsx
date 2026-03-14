@@ -25,10 +25,10 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_520px]">
           <div className="surface-card rounded-[2rem] p-6 sm:p-7">
-            <BrandMark href="/" size="lg" subtitle="Signal-grade resale" />
+            <BrandMark href="/" size="lg" subtitle="New tech marketplace" />
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/68">
-              Premium marketplace infrastructure for trusted electronics commerce with a sharper
-              brand, cleaner listings, and more confident checkout flow.
+              A simpler place to buy and sell used tech with clearer listings, visible seller
+              info, and support pages that are easy to find.
             </p>
           </div>
 
@@ -55,7 +55,7 @@ export default function Footer() {
 
         <div className="flex flex-col gap-2 border-t border-white/8 pt-6 text-xs text-white/46 sm:flex-row sm:items-center sm:justify-between">
           <p>Copyright {new Date().getFullYear()} TekSwapp. All rights reserved.</p>
-          <p>Built for verified phones, laptops, tablets, consoles, and audio gear.</p>
+          <p>Phones, laptops, tablets, consoles, wearables, and audio gear.</p>
         </div>
       </div>
     </footer>

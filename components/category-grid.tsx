@@ -4,37 +4,37 @@ const categories = [
   {
     name: 'Phones',
     href: '/listings?category=Phones',
-    description: 'Flagships, trade-ins, and unlocked everyday devices',
+    description: 'iPhones, Galaxies, Pixels, and unlocked everyday devices',
     code: 'PH',
   },
   {
     name: 'Tablets',
     href: '/listings?category=Tablets',
-    description: 'Portable setups for sketching, work, and entertainment',
+    description: 'iPads and tablets for school, work, drawing, and streaming',
     code: 'TB',
   },
   {
     name: 'Laptops',
     href: '/listings?category=Laptops',
-    description: 'Ultrabooks, gaming rigs, and creator machines',
+    description: 'MacBooks, Windows laptops, gaming rigs, and creator machines',
     code: 'LP',
   },
   {
     name: 'Consoles',
     href: '/listings?category=Consoles',
-    description: 'Current-gen hardware, bundles, and collector drops',
+    description: 'PlayStation, Xbox, Nintendo, bundles, and extra controllers',
     code: 'CN',
   },
   {
     name: 'Wearables',
     href: '/listings?category=Wearables',
-    description: 'Smartwatches, trackers, and performance-focused gear',
+    description: 'Apple Watch, Galaxy Watch, fitness trackers, and accessories',
     code: 'WR',
   },
   {
     name: 'Audio',
     href: '/listings?category=Audio',
-    description: 'Headphones, monitors, speakers, and mobile sound',
+    description: 'Headphones, earbuds, speakers, microphones, and studio gear',
     code: 'AU',
   },
 ]
@@ -45,17 +45,17 @@ export default function CategoryGrid() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="section-kicker">Device lanes</p>
+            <p className="section-kicker">Shop by device</p>
             <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Shop by category, not chaos
+              Jump straight to the tech you want
             </h2>
             <p className="section-copy mt-3 text-sm leading-relaxed sm:text-base">
-              Every category is tuned for tech resale with cleaner specs, clearer condition tags,
-              and faster filtering.
+              Start with the device type you already know, then narrow by condition, seller
+              verification, and price.
             </p>
           </div>
           <Link href="/listings" className="text-sm text-white/68 transition-colors hover:text-white">
-            Explore the full catalog
+            See every listing
           </Link>
         </div>
 
@@ -71,17 +71,16 @@ export default function CategoryGrid() {
                   {category.code}
                 </div>
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-white/46 transition-colors group-hover:text-white/78">
-                  Explore
+                  Browse
                 </span>
               </div>
 
               <h3 className="mt-8 text-2xl font-semibold text-white">{category.name}</h3>
               <p className="mt-3 text-sm leading-relaxed text-white/66">{category.description}</p>
 
-              <div className="mt-8 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/42">
-                <span className="h-px flex-1 bg-white/10" />
-                <span>verified flow</span>
-              </div>
+              <p className="mt-8 text-xs uppercase tracking-[0.2em] text-[#67F2FF]">
+                Shop {category.name}
+              </p>
             </Link>
           ))}
         </div>

@@ -1,19 +1,19 @@
 const highlights = [
   {
-    title: 'Protected payments',
-    text: 'Buyer funds stay protected until delivery requirements are met and the transaction clears the platform workflow.',
+    title: 'Easier to compare',
+    text: 'Listings are built around the details tech buyers usually look for first, so you spend less time guessing.',
   },
   {
-    title: 'Verified sellers',
-    text: 'Identity review, seller history, and marketplace signals reduce the noise that makes tech resale feel risky.',
+    title: 'Seller info up front',
+    text: 'Verified badges and seller history are shown right on the listing so trust signals are visible before checkout.',
   },
   {
-    title: 'Device confidence',
-    text: 'IMEI and serial screening give buyers more confidence before payout release and help filter bad inventory earlier.',
+    title: 'Structured checkout',
+    text: 'The order flow is designed around tracked delivery and review checkpoints instead of a vague handoff.',
   },
   {
-    title: 'Cleaner economics',
-    text: 'A leaner fee model and better listing quality keep more value on the table for both sides of the deal.',
+    title: 'Support that is easy to find',
+    text: 'Buyer protection, seller standards, and contact support pages are linked throughout the storefront.',
   },
 ]
 
@@ -24,20 +24,20 @@ export default function WhyTekSwapp() {
         <div className="surface-card rounded-[2rem] p-6 sm:p-7">
           <p className="section-kicker">Why TekSwapp</p>
           <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">
-            High-trust resale, tuned for electronics
+            Built for careful tech buyers
           </h2>
           <p className="section-copy mt-4 text-sm leading-relaxed sm:text-base">
-            TekSwapp is designed to make second-hand electronics feel safer, faster, and more
-            professional for both buyers and sellers.
+            TekSwapp is a new marketplace, so trust has to be earned. We start by making listings
+            clearer, seller information more visible, and support easier to reach.
           </p>
 
           <div className="mt-8 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/42">Platform posture</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/42">What shoppers get</p>
             <div className="mt-4 space-y-3">
               {[
-                'Structured dispute handling',
-                'Consistent condition grading',
-                'Seller performance visibility',
+                'Cleaner listing fields',
+                'Visible seller verification',
+                'Help pages linked from the shop flow',
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3 text-sm text-white/78">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#67F2FF]" />

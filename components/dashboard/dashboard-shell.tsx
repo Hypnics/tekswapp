@@ -100,9 +100,18 @@ export default function DashboardShell({
     () => getListingCountByStatus(snapshot.listings, 'draft'),
     [snapshot.listings]
   )
-  const salesVolume = useMemo(
-    () => snapshot.sales.reduce((total, sale) => total + sale.amount, 0),
+  const saleCurrencies = useMemo(
+    () => new Set(snapshot.sales.map((sale) => sale.currencyCode)),
     [snapshot.sales]
+  )
+  const salesVolumeLabel = useMemo(
+    () =>
+      snapshot.sales.length === 0
+        ? '$0'
+        : saleCurrencies.size === 1
+          ? formatPrice(snapshot.sales.reduce((total, sale) => total + sale.amount, 0), snapshot.sales[0].currencyCode)
+          : 'Multi-currency',
+    [saleCurrencies, snapshot.sales]
   )
   const liveOrders = useMemo(
     () => snapshot.sales.filter((sale) => sale.shippingStatus !== 'delivered').length,
@@ -131,7 +140,7 @@ export default function DashboardShell({
       },
       {
         label: 'Sales volume',
-        value: formatPrice(salesVolume, 'USD'),
+        value: salesVolumeLabel,
         hint: snapshot.sales.length > 0 ? `${snapshot.sales.length} orders captured` : 'No orders yet',
       },
       {
@@ -151,7 +160,7 @@ export default function DashboardShell({
       draftListings,
       isRefreshing,
       pendingActions,
-      salesVolume,
+      salesVolumeLabel,
       sellerReady,
       snapshot.sales.length,
     ]

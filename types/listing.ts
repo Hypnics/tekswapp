@@ -1,4 +1,6 @@
 export type Condition = 'New' | 'Like New' | 'Good' | 'Fair' | 'Poor'
+export type CurrencyCode = 'USD'
+export type ShippingMode = 'none' | 'basic' | 'advanced'
 
 export type Category =
   | 'Phones'
@@ -17,6 +19,26 @@ export interface Seller {
   verified: boolean
   joinedDate: string
   avatarUrl?: string
+}
+
+export interface ShippingRate {
+  countryCode: string
+  countryName: string
+  amount: number
+  minDays?: number
+  maxDays?: number
+}
+
+export interface ShippingProfile {
+  sellerCountryCode: string
+  sellerCountryName: string
+  domesticAmount?: number
+  domesticMinDays?: number
+  domesticMaxDays?: number
+  internationalAmount?: number
+  internationalMinDays?: number
+  internationalMaxDays?: number
+  advancedRates?: ShippingRate[]
 }
 
 export interface Listing {
@@ -42,4 +64,7 @@ export interface Listing {
   watchers?: number
   status?: 'active' | 'draft' | 'sold' | 'pending_review' | 'paused'
   deviceSpecs?: Record<string, string>
+  currencyCode: CurrencyCode
+  shippingMode: ShippingMode
+  shippingProfile?: ShippingProfile
 }

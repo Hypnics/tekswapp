@@ -175,7 +175,7 @@ function AuthPageContent() {
         <div className="surface-card relative w-full rounded-[2.2rem] p-6 sm:p-8">
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
-              <BrandMark href="/" size="md" subtitle="Signal-grade access" />
+              <BrandMark href="/" size="md" subtitle="Account access" />
               <h2 className="mt-6 text-2xl font-semibold text-white">
                 {mode === 'login' ? 'Welcome back' : 'Join TekSwapp'}
               </h2>
@@ -331,7 +331,7 @@ function AuthPageFallback() {
   return (
     <div className="page-shell flex min-h-screen items-center justify-center px-4 py-24">
       <div className="surface-card w-full max-w-md rounded-[2.2rem] p-8 text-center">
-        <BrandMark href="/" size="md" subtitle="Signal-grade access" />
+        <BrandMark href="/" size="md" subtitle="Account access" />
         <p className="mt-6 text-sm text-white/58">Loading account access...</p>
       </div>
     </div>
