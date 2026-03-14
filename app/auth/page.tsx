@@ -164,7 +164,7 @@ function AuthPageContent() {
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-[1.4rem] border border-white/8 bg-[#06101d]/58 px-5 py-4 text-sm text-white/76"
+                className="rounded-[1.4rem] border border-white/8 bg-white/[0.08] px-5 py-4 text-sm text-white/76 backdrop-blur-sm"
               >
                 {item}
               </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Manrope, Sora } from 'next/font/google'
+import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
 const manrope = Manrope({
@@ -14,16 +15,35 @@ const sora = Sora({
   display: 'swap',
 })
 
+const siteUrl = getSiteUrl()
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'TekSwapp | Verified Tech Marketplace',
   description:
     'TekSwapp is the verified tech marketplace for premium resale. Buy and sell phones, laptops, tablets, and consoles with protected payments.',
   keywords: ['electronics marketplace', 'buy phone', 'sell laptop', 'verified tech', 'IMEI check'],
+  applicationName: 'TekSwapp',
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
     title: 'TekSwapp | Verified Tech Marketplace',
-    description: 'Buy and sell premium electronics with verified sellers, protected checkout, and cleaner listings.',
+    description:
+      'Buy and sell premium electronics with verified sellers, protected checkout, and cleaner listings.',
     siteName: 'TekSwapp',
     type: 'website',
+    url: siteUrl,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TekSwapp | Verified Tech Marketplace',
+    description:
+      'Buy and sell premium electronics with verified sellers, protected checkout, and cleaner listings.',
   },
 }
 

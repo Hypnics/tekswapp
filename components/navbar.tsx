@@ -72,7 +72,7 @@ export default function Navbar() {
 
   return (
     <nav className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-4">
-      <div className="mx-auto max-w-7xl rounded-[1.6rem] border border-white/10 bg-[#07111f]/78 px-4 backdrop-blur-2xl sm:px-6">
+      <div className="mx-auto max-w-7xl rounded-[1.6rem] border border-white/10 bg-[rgba(15,35,62,0.68)] px-4 shadow-[0_16px_50px_rgba(6,14,31,0.18)] backdrop-blur-2xl sm:px-6">
         <div className="flex h-[72px] items-center justify-between gap-4">
           <BrandMark
             href="/"

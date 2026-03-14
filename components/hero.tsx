@@ -74,7 +74,7 @@ export default function Hero() {
 
             <div className="ambient-divider mt-6" />
 
-            <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(79,140,255,0.14),rgba(255,255,255,0.03))] p-5">
+            <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(79,140,255,0.18),rgba(255,255,255,0.06))] p-5">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">Trade command center</p>
                 <span className="text-xs text-[#67F2FF]">Updated 24/7</span>
@@ -83,7 +83,7 @@ export default function Hero() {
                 {commandCenterItems.map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center justify-between rounded-2xl border border-white/8 bg-[#050c17]/55 px-4 py-3"
+                    className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.08] px-4 py-3"
                   >
                     <span className="text-sm text-white/62">{item.label}</span>
                     <span className="text-sm font-semibold text-white">{item.value}</span>

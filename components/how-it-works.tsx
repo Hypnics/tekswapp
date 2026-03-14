@@ -28,7 +28,7 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section id="how-it-works" className="px-4 pb-20">
-      <div className="mx-auto max-w-7xl rounded-[2.25rem] border border-white/8 bg-[linear-gradient(180deg,rgba(79,140,255,0.09),rgba(255,255,255,0.02))] p-6 sm:p-8 lg:p-10">
+      <div className="mx-auto max-w-7xl rounded-[2.25rem] border border-white/8 bg-[linear-gradient(180deg,rgba(79,140,255,0.16),rgba(255,255,255,0.06))] p-6 sm:p-8 lg:p-10">
         <div className="mb-8 max-w-3xl">
           <p className="section-kicker">How it works</p>
           <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
@@ -44,7 +44,7 @@ export default function HowItWorks() {
           {steps.map((step) => (
             <article
               key={step.number}
-              className="rounded-[1.75rem] border border-white/8 bg-[#06101d]/58 p-5"
+              className="rounded-[1.75rem] border border-white/8 bg-white/[0.07] p-5 backdrop-blur-sm"
             >
               <p className="text-sm font-semibold tracking-[0.22em] text-[#67F2FF]">{step.number}</p>
               <h3 className="mt-6 text-xl font-semibold text-white">{step.title}</h3>

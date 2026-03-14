@@ -41,7 +41,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         />
         <div
           className="absolute inset-x-0 bottom-0 h-24"
-          style={{ background: 'linear-gradient(to top, rgba(11,15,26,0.92), transparent)' }}
+          style={{ background: 'linear-gradient(to top, rgba(18,34,58,0.78), transparent)' }}
         />
 
         <div className="absolute left-3 top-3 flex items-center gap-2">

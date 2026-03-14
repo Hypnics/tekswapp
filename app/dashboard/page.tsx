@@ -24,6 +24,7 @@ function fallbackSnapshot(): DashboardSnapshot {
     email: 'dev@tekswapp.com',
     emailVerified: false,
     displayName: 'Developer',
+    generatedAt: new Date().toISOString(),
     profile,
     listings: [],
     sales: [],

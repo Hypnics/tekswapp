@@ -1,5 +1,5 @@
-export function formatPrice(amount: number, currency = 'GBP'): string {
-  return new Intl.NumberFormat('en-GB', {
+export function formatPrice(amount: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
@@ -24,5 +24,5 @@ export function cn(...classes: (string | undefined | null | false)[]): string {
 }
 
 export function truncate(str: string, length: number): string {
-  return str.length > length ? str.slice(0, length) + '…' : str
+  return str.length > length ? str.slice(0, length) + '...' : str
 }

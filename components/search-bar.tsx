@@ -1,20 +1,57 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const categories = ['All categories', 'Phones', 'Tablets', 'Laptops', 'Consoles', 'Wearables', 'Audio']
+const categories = [
+  'All categories',
+  'Phones',
+  'Tablets',
+  'Laptops',
+  'Consoles',
+  'Wearables',
+  'Audio',
+  'Other',
+]
+
+const defaultSuggestions = [
+  'iPhone 15 Pro',
+  'MacBook Pro M3',
+  'Galaxy S24 Ultra',
+  'iPad Pro',
+  'PS5 Slim',
+]
 
 interface SearchBarProps {
   className?: string
   showSuggestions?: boolean
+  initialQuery?: string
+  initialCategory?: string
+  suggestions?: string[]
 }
 
-export default function SearchBar({ className = '', showSuggestions = true }: SearchBarProps) {
+export default function SearchBar({
+  className = '',
+  showSuggestions = true,
+  initialQuery = '',
+  initialCategory = 'All categories',
+  suggestions = defaultSuggestions,
+}: SearchBarProps) {
   const router = useRouter()
-  const [query, setQuery] = useState('')
-  const [category, setCategory] = useState('All categories')
+  const normalizedInitialCategory = categories.includes(initialCategory)
+    ? initialCategory
+    : 'All categories'
+  const [query, setQuery] = useState(initialQuery)
+  const [category, setCategory] = useState(normalizedInitialCategory)
   const [focused, setFocused] = useState(false)
+
+  useEffect(() => {
+    setQuery(initialQuery)
+  }, [initialQuery])
+
+  useEffect(() => {
+    setCategory(normalizedInitialCategory)
+  }, [normalizedInitialCategory])
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -72,7 +109,7 @@ export default function SearchBar({ className = '', showSuggestions = true }: Se
                 className="w-full cursor-pointer bg-transparent text-sm text-white/74 outline-none"
               >
                 {categories.map((cat) => (
-                  <option key={cat} value={cat} className="bg-[#07111f] text-white">
+                  <option key={cat} value={cat} className="bg-[#112a4d] text-white">
                     {cat}
                   </option>
                 ))}
@@ -94,21 +131,19 @@ export default function SearchBar({ className = '', showSuggestions = true }: Se
       {showSuggestions ? (
         <div className="mt-4 flex flex-wrap items-center gap-2.5">
           <span className="text-[11px] uppercase tracking-[0.2em] text-white/38">Popular now</span>
-          {['iPhone 15 Pro', 'MacBook Pro M3', 'Galaxy S24 Ultra', 'iPad Pro', 'PS5 Slim'].map(
-            (term) => (
-              <button
-                key={term}
-                type="button"
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/70 transition-colors hover:border-[#67F2FF]/28 hover:text-white"
-                onClick={() => {
-                  setQuery(term)
-                  router.push(`/listings?q=${encodeURIComponent(term)}`)
-                }}
-              >
-                {term}
-              </button>
-            )
-          )}
+          {suggestions.map((term) => (
+            <button
+              key={term}
+              type="button"
+              className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/70 transition-colors hover:border-[#67F2FF]/28 hover:text-white"
+              onClick={() => {
+                setQuery(term)
+                router.push(`/listings?q=${encodeURIComponent(term)}`)
+              }}
+            >
+              {term}
+            </button>
+          ))}
         </div>
       ) : null}
     </div>

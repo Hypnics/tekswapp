@@ -223,6 +223,7 @@ export async function loadDashboardSnapshot(
       profile.full_name ||
       authUser.email ||
       'User',
+    generatedAt: new Date().toISOString(),
     profile,
     listings,
     sales,

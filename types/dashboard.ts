@@ -82,6 +82,7 @@ export interface DashboardSnapshot {
   email: string
   emailVerified: boolean
   displayName: string
+  generatedAt: string
   profile: ProfileRecord
   listings: DashboardListing[]
   sales: SaleOrder[]

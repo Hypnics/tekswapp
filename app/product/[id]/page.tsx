@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import Footer from '@/components/footer'
@@ -18,16 +19,49 @@ const conditionColor: Record<string, string> = {
   Poor: 'border-red-400/20 bg-red-400/10 text-red-400',
 }
 
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { id } = await params
+  const listing = await getMarketplaceListingById(id)
+
+  if (!listing) {
+    return {
+      title: 'Listing not found | TekSwapp',
+      description: 'This TekSwapp listing is unavailable, sold, or no longer public.',
+    }
+  }
+
+  const title = `${listing.title} | TekSwapp`
+  const description = `Shop ${listing.condition.toLowerCase()} ${listing.title} on TekSwapp for ${formatPrice(listing.price)} with verified marketplace protections.`
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/product/${listing.id}`,
+    },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  }
+}
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params
   const listing = await getMarketplaceListingById(id)
 
   if (!listing) {
     return (
-      <div className="min-h-screen" style={{ background: '#0B0F1A' }}>
+      <div className="page-shell min-h-screen text-white">
         <Navbar />
         <main className="px-4 pb-20 pt-24">
-          <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-white/[0.02] p-8 text-center">
+          <div className="surface-card mx-auto max-w-3xl rounded-2xl p-8 text-center">
             <h1 className="text-2xl font-semibold text-white">Listing not found</h1>
             <p className="mt-3 text-sm text-white/65">
               This listing may be unavailable, sold, or private to the seller account.
@@ -71,7 +105,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     }))
 
   return (
-    <div className="min-h-screen" style={{ background: '#0B0F1A' }}>
+    <div className="page-shell min-h-screen text-white">
       <Navbar />
       <main className="px-4 pb-20 pt-24">
         <div className="mx-auto max-w-6xl">
@@ -95,7 +129,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </nav>
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/6 bg-white/3">
+            <div className="surface-card-soft relative aspect-square overflow-hidden rounded-2xl">
               <Image
                 src={imageSrc}
                 alt={listing.title}
@@ -126,7 +160,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl">{listing.title}</h1>
+                <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl">
+                  {listing.title}
+                </h1>
               </div>
 
               <div className="flex items-baseline gap-3">
@@ -140,7 +176,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 {[...baseSpecs, ...dynamicSpecs].map((spec) => (
-                  <div key={spec.label} className="rounded-xl border border-white/6 bg-white/3 px-4 py-3">
+                  <div
+                    key={spec.label}
+                    className="rounded-xl border border-white/8 bg-white/[0.08] px-4 py-3 backdrop-blur-sm"
+                  >
                     <div className="mb-0.5 text-xs text-white/30">{spec.label}</div>
                     <div className="text-sm font-medium text-white">{spec.value}</div>
                   </div>
@@ -159,24 +198,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </button>
               </div>
 
-              <div className="rounded-2xl border border-white/6 bg-white/3 p-5">
+              <div className="rounded-2xl border border-white/8 bg-white/[0.08] p-5 backdrop-blur-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-white/70">Seller</h3>
-                  {listing.seller.verified && <span className="text-xs text-[#22D3EE]">Verified Seller</span>}
+                  {listing.seller.verified && (
+                    <span className="text-xs text-[#22D3EE]">Verified Seller</span>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2563EB]/30">
-                    <span className="text-sm font-bold text-[#22D3EE]">{listing.seller.name.charAt(0)}</span>
+                    <span className="text-sm font-bold text-[#22D3EE]">
+                      {listing.seller.name.charAt(0)}
+                    </span>
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-white">{listing.seller.name}</div>
                     <div className="mt-0.5 text-xs text-white/40">
-                      {listing.seller.rating.toFixed(1)} rating · {listing.seller.totalSales} sales
+                      {listing.seller.rating.toFixed(1)} rating - {listing.seller.totalSales} sales
                     </div>
                   </div>
                 </div>
                 {listing.sellerNotes && (
-                  <div className="mt-4 rounded-xl bg-white/3 px-4 py-3">
+                  <div className="mt-4 rounded-xl bg-white/[0.08] px-4 py-3">
                     <p className="text-xs italic text-white/40">&quot;{listing.sellerNotes}&quot;</p>
                   </div>
                 )}
@@ -184,9 +227,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </div>
 
-          <div className="mt-10 rounded-2xl border border-white/6 bg-white/3 p-8">
+          <div className="surface-card mt-10 rounded-2xl p-8">
             <h2 className="mb-4 text-lg font-semibold text-white">Description</h2>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-white/50">{listing.description}</p>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-white/50">
+              {listing.description}
+            </p>
           </div>
         </div>
       </main>

@@ -13,6 +13,11 @@ const statusStyles: Record<PurchaseOrder['status'], { label: string; color: stri
 }
 
 export default function PurchasesPanel({ purchases }: PurchasesPanelProps) {
+  const totalSpend = purchases.reduce((total, purchase) => total + purchase.amount, 0)
+  const inTransit = purchases.filter((purchase) => purchase.status !== 'delivered').length
+  const delivered = purchases.filter((purchase) => purchase.status === 'delivered').length
+  const trackingPending = purchases.filter((purchase) => !purchase.trackingCode).length
+
   if (purchases.length === 0) {
     return (
       <EmptyState
@@ -23,15 +28,36 @@ export default function PurchasesPanel({ purchases }: PurchasesPanelProps) {
   }
 
   return (
-    <section
-      className="rounded-2xl border p-4 sm:p-5"
-      style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}
-    >
-      <h2 className="text-xl font-semibold text-white">Purchases</h2>
-      <p className="mt-1 text-sm text-white/65">Review order history, status, and tracking placeholders.</p>
+    <section className="dashboard-panel rounded-[1.75rem] p-4 sm:p-6">
+      <div>
+        <p className="section-kicker">Buyer history</p>
+        <h2 className="mt-3 text-2xl font-semibold text-white">Purchases</h2>
+        <p className="mt-2 max-w-2xl text-sm text-white/65">
+          Review your order history, shipping updates, and tracking placeholders from a single buyer view.
+        </p>
+      </div>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[760px] border-separate border-spacing-y-2">
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
+          <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">Total spend</p>
+          <p className="mt-2 text-2xl font-semibold text-white">{formatPrice(totalSpend, 'USD')}</p>
+        </div>
+        <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
+          <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">On the way</p>
+          <p className="mt-2 text-2xl font-semibold text-white">{inTransit}</p>
+        </div>
+        <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
+          <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">Delivered</p>
+          <p className="mt-2 text-2xl font-semibold text-white">{delivered}</p>
+        </div>
+        <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
+          <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">Tracking pending</p>
+          <p className="mt-2 text-2xl font-semibold text-white">{trackingPending}</p>
+        </div>
+      </div>
+
+      <div className="mt-5 overflow-x-auto">
+        <table className="w-full min-w-[780px] border-separate border-spacing-y-2">
           <thead>
             <tr className="text-left text-xs uppercase tracking-[0.08em] text-white/45">
               <th className="px-3 py-2">Item</th>
@@ -44,15 +70,15 @@ export default function PurchasesPanel({ purchases }: PurchasesPanelProps) {
           </thead>
           <tbody>
             {purchases.map((purchase) => (
-              <tr key={purchase.id} className="bg-white/[0.03]">
-                <td className="rounded-l-xl px-3 py-3">
+              <tr key={purchase.id} className="dashboard-table-row">
+                <td className="rounded-l-2xl px-3 py-3">
                   <p className="text-sm font-semibold text-white">{purchase.itemTitle}</p>
-                  <p className="text-xs text-white/55">{purchase.orderNumber}</p>
+                  <p className="mt-1 text-xs text-white/55">{purchase.orderNumber}</p>
                 </td>
                 <td className="px-3 py-3 text-sm text-white">{purchase.sellerName}</td>
                 <td className="px-3 py-3">
                   <span
-                    className="rounded-full px-2.5 py-1 text-xs font-medium"
+                    className="rounded-full px-2.5 py-1 text-xs font-semibold"
                     style={{
                       color: statusStyles[purchase.status].color,
                       background: statusStyles[purchase.status].bg,
@@ -62,12 +88,12 @@ export default function PurchasesPanel({ purchases }: PurchasesPanelProps) {
                   </span>
                 </td>
                 <td className="px-3 py-3 text-sm text-white/70">
-                  {purchase.trackingCode ?? 'Tracking pending'}
+                  {purchase.trackingCode || 'Tracking pending'}
                 </td>
                 <td className="px-3 py-3 text-sm font-semibold text-white">
                   {formatPrice(purchase.amount, 'USD')}
                 </td>
-                <td className="rounded-r-xl px-3 py-3 text-sm text-white/65">
+                <td className="rounded-r-2xl px-3 py-3 text-sm text-white/65">
                   {formatDate(purchase.purchasedAt)}
                 </td>
               </tr>

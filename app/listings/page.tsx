@@ -1,10 +1,10 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import ListingCard from '@/components/listing-card'
-import {
-  getMarketplaceListings,
-} from '@/lib/marketplace'
+import SearchBar from '@/components/search-bar'
+import { getMarketplaceListings } from '@/lib/marketplace'
 import {
   LISTING_CONDITIONS,
   LISTING_SORT_OPTIONS,
@@ -14,15 +14,25 @@ import {
   normalizeVerifiedFilter,
   normalizeSortFilter,
 } from '@/lib/marketplace-config'
+import { formatPrice } from '@/lib/utils'
+
+export const metadata: Metadata = {
+  title: 'Marketplace Listings | TekSwapp',
+  description:
+    'Browse verified phones, laptops, tablets, consoles, wearables, and audio gear on TekSwapp.',
+  alternates: {
+    canonical: '/listings',
+  },
+}
 
 interface ListingsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     q?: string | string[]
     category?: string | string[]
     condition?: string | string[]
     verified?: string | string[]
     sort?: string | string[]
-  }
+  }>
 }
 
 interface UrlParams {
@@ -56,12 +66,17 @@ function withUpdates(current: UrlParams, updates: Partial<UrlParams>): string {
   })
 }
 
+function getSortLabel(value: string): string {
+  return LISTING_SORT_OPTIONS.find((option) => option.value === value)?.label ?? 'Newest first'
+}
+
 export default async function ListingsPage({ searchParams }: ListingsPageProps) {
-  const query = firstParam(searchParams.q)?.trim() ?? ''
-  const category = normalizeCategoryFilter(firstParam(searchParams.category))
-  const condition = normalizeConditionFilter(firstParam(searchParams.condition))
-  const verifiedOnly = normalizeVerifiedFilter(firstParam(searchParams.verified))
-  const sort = normalizeSortFilter(firstParam(searchParams.sort))
+  const resolvedSearchParams = await searchParams
+  const query = firstParam(resolvedSearchParams.q)?.trim() ?? ''
+  const category = normalizeCategoryFilter(firstParam(resolvedSearchParams.category))
+  const condition = normalizeConditionFilter(firstParam(resolvedSearchParams.condition))
+  const verifiedOnly = normalizeVerifiedFilter(firstParam(resolvedSearchParams.verified))
+  const sort = normalizeSortFilter(firstParam(resolvedSearchParams.sort))
 
   const currentUrlState: UrlParams = {
     q: query || undefined,
@@ -80,27 +95,135 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
   })
 
   const activeCategoryLabel = category ?? 'All Categories'
+  const activeFilters = [
+    ...(query
+      ? [{ label: `Search: ${query}`, href: withUpdates(currentUrlState, { q: undefined }) }]
+      : []),
+    ...(category
+      ? [{ label: category, href: withUpdates(currentUrlState, { category: undefined }) }]
+      : []),
+    ...(condition
+      ? [{ label: condition, href: withUpdates(currentUrlState, { condition: undefined }) }]
+      : []),
+    ...(verifiedOnly
+      ? [{ label: 'Verified sellers', href: withUpdates(currentUrlState, { verified: undefined }) }]
+      : []),
+    ...(sort !== 'newest'
+      ? [{ label: getSortLabel(sort), href: withUpdates(currentUrlState, { sort: undefined }) }]
+      : []),
+  ]
+  const verifiedCount = filtered.filter((listing) => listing.seller.verified).length
+  const averagePrice =
+    filtered.length > 0
+      ? Math.round(filtered.reduce((sum, listing) => sum + listing.price, 0) / filtered.length)
+      : 0
+  const highestWatchCount = filtered.reduce(
+    (max, listing) => Math.max(max, listing.watchers ?? 0),
+    0
+  )
+  const hasActiveFilters = activeFilters.length > 0
+  const quickBrowseCategories = MARKETPLACE_CATEGORIES.filter((value) => value !== 'Other')
 
   return (
     <div className="page-shell">
       <Navbar />
       <main className="relative px-4 pb-20 pt-28">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold text-white">
-              {activeCategoryLabel === 'All Categories' ? 'All Listings' : activeCategoryLabel}
-            </h1>
-            <p className="text-sm text-white/50">
-              {filtered.length} listing{filtered.length !== 1 ? 's' : ''} found
-              {query ? ` for "${query}"` : ''}
-            </p>
+          <div className="mb-8 rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(79,140,255,0.14),rgba(255,255,255,0.03),rgba(103,242,255,0.08))] p-6 shadow-[0_24px_70px_rgba(2,8,21,0.4)] sm:p-8">
+            <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_250px] xl:items-end">
+              <div>
+                <p className="section-kicker">Marketplace search</p>
+                <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
+                  {activeCategoryLabel === 'All Categories'
+                    ? 'Browse live marketplace inventory'
+                    : `${activeCategoryLabel} listings`}
+                </h1>
+                <p className="section-copy mt-3 max-w-3xl text-sm leading-relaxed sm:text-base">
+                  Search verified inventory, narrow by condition, and surface the listings worth
+                  watching before you commit.
+                </p>
+
+                <SearchBar
+                  className="mt-6 max-w-5xl"
+                  showSuggestions={false}
+                  initialQuery={query}
+                  initialCategory={category ?? 'All categories'}
+                />
+
+                {hasActiveFilters ? (
+                  <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-white/38">
+                      Active filters
+                    </span>
+                    {activeFilters.map((filter) => (
+                      <Link
+                        key={filter.label}
+                        href={filter.href}
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/74 transition-colors hover:text-white"
+                      >
+                        {filter.label} x
+                      </Link>
+                    ))}
+                    <Link
+                      href="/listings"
+                      className="rounded-full border border-[#67F2FF]/24 bg-[#67F2FF]/10 px-3.5 py-1.5 text-xs font-semibold text-[#67F2FF] transition-colors hover:text-white"
+                    >
+                      Clear all
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-white/38">
+                      Quick browse
+                    </span>
+                    {quickBrowseCategories.map((value) => (
+                      <Link
+                        key={value}
+                        href={`/listings?category=${encodeURIComponent(value)}`}
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/70 transition-colors hover:border-[#67F2FF]/28 hover:text-white"
+                      >
+                        {value}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                <div className="surface-card-soft rounded-[1.5rem] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/42">Results</p>
+                  <p className="mt-3 text-2xl font-semibold text-white">{filtered.length}</p>
+                  <p className="mt-1 text-sm text-white/58">
+                    Listing{filtered.length !== 1 ? 's' : ''} matching this view
+                  </p>
+                </div>
+                <div className="surface-card-soft rounded-[1.5rem] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/42">Verified</p>
+                  <p className="mt-3 text-2xl font-semibold text-white">{verifiedCount}</p>
+                  <p className="mt-1 text-sm text-white/58">Seller-verified listings in scope</p>
+                </div>
+                <div className="surface-card-soft rounded-[1.5rem] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/42">
+                    Market signal
+                  </p>
+                  <p className="mt-3 text-2xl font-semibold text-white">
+                    {filtered.length > 0 ? formatPrice(averagePrice) : 'No data'}
+                  </p>
+                  <p className="mt-1 text-sm text-white/58">
+                    Average ask{highestWatchCount > 0 ? ` - top watchlist ${highestWatchCount}` : ''}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col gap-8 lg:flex-row">
             <aside className="shrink-0 lg:w-56">
               <div className="surface-card sticky top-24 rounded-[1.8rem] p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-xs font-semibold uppercase tracking-widest text-white/30">Filters</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-widest text-white/30">
+                    Filters
+                  </h3>
                   <Link href="/listings" className="text-xs text-[#67F2FF] hover:text-white">
                     Clear
                   </Link>
@@ -175,12 +298,35 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                     Verified only
                   </Link>
                 </div>
+
+                <div className="mt-6 rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-white/42">
+                    Need more confidence?
+                  </p>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <Link
+                      href="/buyer-protection"
+                      className="text-sm text-white/68 transition-colors hover:text-white"
+                    >
+                      Read buyer protection
+                    </Link>
+                    <Link
+                      href="/seller-standards"
+                      className="text-sm text-white/68 transition-colors hover:text-white"
+                    >
+                      Review seller standards
+                    </Link>
+                  </div>
+                </div>
               </div>
             </aside>
 
             <div className="flex-1">
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm text-white/30">Showing {filtered.length} results</span>
+                <span className="text-sm text-white/30">
+                  Showing {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                  {query ? ` for "${query}"` : ''}
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {LISTING_SORT_OPTIONS.map((option) => {
                     const isActive = sort === option.value
@@ -208,11 +354,38 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                   ))}
                 </div>
               ) : (
-                <div className="surface-card flex flex-col items-center justify-center rounded-[1.85rem] py-24 text-center">
+                <div className="surface-card flex flex-col items-center justify-center rounded-[1.85rem] px-6 py-24 text-center">
                   <h3 className="mb-2 text-lg font-semibold text-white">No listings found</h3>
                   <p className="text-sm text-white/52">
-                    Try adjusting your search or clearing filters.
+                    {hasActiveFilters
+                      ? 'Try adjusting your search or clearing filters to widen the marketplace view.'
+                      : 'There are no published listings yet. Sellers can publish the first device now.'}
                   </p>
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <Link
+                      href="/listings"
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/82 transition-colors hover:text-white"
+                    >
+                      Clear filters
+                    </Link>
+                    <Link
+                      href="/sell"
+                      className="brand-button rounded-full px-5 py-3 text-sm font-semibold text-white"
+                    >
+                      List a device
+                    </Link>
+                  </div>
+                  <div className="mt-6 flex flex-wrap justify-center gap-2">
+                    {quickBrowseCategories.map((value) => (
+                      <Link
+                        key={value}
+                        href={`/listings?category=${encodeURIComponent(value)}`}
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white/68 transition-colors hover:text-white"
+                      >
+                        Browse {value}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
