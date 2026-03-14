@@ -62,7 +62,7 @@ export default function MarketplaceFaq() {
                 key={item.question}
                 className="rounded-[1.65rem] border border-white/8 bg-white/[0.07] p-5 backdrop-blur-sm"
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left">
+                <summary className="flex cursor-pointer list-none flex-col items-start gap-3 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <span className="text-base font-semibold text-white">{item.question}</span>
                   <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-white/52">
                     {item.tag}

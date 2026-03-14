@@ -129,9 +129,9 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
   return (
     <div className="page-shell">
       <Navbar />
-      <main className="relative px-4 pb-20 pt-28">
+      <main className="relative px-4 pb-20 pt-24 sm:pt-28">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-8 rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(79,140,255,0.14),rgba(255,255,255,0.03),rgba(103,242,255,0.08))] p-6 shadow-[0_24px_70px_rgba(2,8,21,0.4)] sm:p-8">
+          <div className="mb-8 rounded-[1.75rem] border border-white/10 bg-[linear-gradient(135deg,rgba(79,140,255,0.14),rgba(255,255,255,0.03),rgba(103,242,255,0.08))] p-5 shadow-[0_24px_70px_rgba(2,8,21,0.4)] sm:rounded-[2rem] sm:p-8">
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_250px] xl:items-end">
               <div>
                 <p className="section-kicker">Marketplace search</p>
@@ -213,9 +213,9 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
             </div>
           </div>
 
-          <div className="flex flex-col gap-8 lg:flex-row">
+          <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row">
             <aside className="shrink-0 lg:w-56">
-              <div className="surface-card sticky top-24 rounded-[1.8rem] p-5">
+              <div className="surface-card rounded-[1.6rem] p-4 sm:rounded-[1.8rem] sm:p-5 lg:sticky lg:top-24">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xs font-semibold uppercase tracking-widest text-white/30">
                     Filters
@@ -225,74 +225,76 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                   </Link>
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
-                    Category
-                  </h3>
-                  <ul className="flex flex-col gap-1">
-                    {['All Categories', ...MARKETPLACE_CATEGORIES].map((cat) => {
-                      const value = cat === 'All Categories' ? undefined : cat
-                      const isActive = (category ?? 'All Categories') === cat
-                      return (
-                        <li key={cat}>
-                          <Link
-                            href={withUpdates(currentUrlState, { category: value })}
-                            className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
-                              isActive
-                                ? 'bg-[#2563EB]/16 font-medium text-[#8fb4ff]'
-                                : 'text-white/50 hover:bg-white/5 hover:text-white'
-                            }`}
-                          >
-                            {cat}
-                          </Link>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
+                  <div>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
+                      Category
+                    </h3>
+                    <ul className="flex flex-col gap-1">
+                      {['All Categories', ...MARKETPLACE_CATEGORIES].map((cat) => {
+                        const value = cat === 'All Categories' ? undefined : cat
+                        const isActive = (category ?? 'All Categories') === cat
+                        return (
+                          <li key={cat}>
+                            <Link
+                              href={withUpdates(currentUrlState, { category: value })}
+                              className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                                isActive
+                                  ? 'bg-[#2563EB]/16 font-medium text-[#8fb4ff]'
+                                  : 'text-white/50 hover:bg-white/5 hover:text-white'
+                              }`}
+                            >
+                              {cat}
+                            </Link>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
 
-                <div className="mb-6">
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
-                    Condition
-                  </h3>
-                  <ul className="flex flex-col gap-1">
-                    {['All Conditions', ...LISTING_CONDITIONS].map((value) => {
-                      const normalizedValue = value === 'All Conditions' ? undefined : value
-                      const isActive = (condition ?? 'All Conditions') === value
-                      return (
-                        <li key={value}>
-                          <Link
-                            href={withUpdates(currentUrlState, { condition: normalizedValue })}
-                            className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
-                              isActive
-                                ? 'bg-[#2563EB]/16 font-medium text-[#8fb4ff]'
-                                : 'text-white/50 hover:bg-white/5 hover:text-white'
-                            }`}
-                          >
-                            {value}
-                          </Link>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
+                  <div>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
+                      Condition
+                    </h3>
+                    <ul className="flex flex-col gap-1">
+                      {['All Conditions', ...LISTING_CONDITIONS].map((value) => {
+                        const normalizedValue = value === 'All Conditions' ? undefined : value
+                        const isActive = (condition ?? 'All Conditions') === value
+                        return (
+                          <li key={value}>
+                            <Link
+                              href={withUpdates(currentUrlState, { condition: normalizedValue })}
+                              className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                                isActive
+                                  ? 'bg-[#2563EB]/16 font-medium text-[#8fb4ff]'
+                                  : 'text-white/50 hover:bg-white/5 hover:text-white'
+                              }`}
+                            >
+                              {value}
+                            </Link>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
 
-                <div>
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
-                    Seller
-                  </h3>
-                  <Link
-                    href={withUpdates(currentUrlState, {
-                      verified: verifiedOnly ? undefined : 'true',
-                    })}
-                    className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
-                      verifiedOnly
-                        ? 'bg-[#2563EB]/16 font-medium text-[#8fb4ff]'
-                        : 'text-white/50 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    Verified only
-                  </Link>
+                  <div>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
+                      Seller
+                    </h3>
+                    <Link
+                      href={withUpdates(currentUrlState, {
+                        verified: verifiedOnly ? undefined : 'true',
+                      })}
+                      className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                        verifiedOnly
+                          ? 'bg-[#2563EB]/16 font-medium text-[#8fb4ff]'
+                          : 'text-white/50 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      Verified only
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="mt-6 rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4">

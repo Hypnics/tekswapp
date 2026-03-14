@@ -28,12 +28,17 @@
 }
 
 html {
+  max-width: 100%;
+  overflow-x: clip;
   scroll-behavior: smooth;
 }
 
 body {
   position: relative;
+  min-height: 100%;
+  max-width: 100%;
   margin: 0;
+  overflow-x: clip;
   background:
     radial-gradient(circle at 12% 0%, rgba(79, 140, 255, 0.3), transparent 32%),
     radial-gradient(circle at 84% 10%, rgba(103, 242, 255, 0.18), transparent 28%),
@@ -91,6 +96,13 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 ::selection {
@@ -208,6 +220,7 @@ textarea {
 
 .page-shell {
   min-height: 100vh;
+  overflow-x: clip;
   position: relative;
 }
 
@@ -442,4 +455,24 @@ textarea {
   box-shadow:
     inset 0 0 0 1px rgba(103, 242, 255, 0.12),
     0 12px 26px rgba(3, 8, 18, 0.18);
+}
+
+@media (max-width: 640px) {
+  body::before {
+    background-size: 56px 56px;
+  }
+
+  .brand-wordmark[data-size="md"] {
+    font-size: 0.95rem;
+    letter-spacing: 0.14em;
+  }
+
+  .brand-wordmark[data-size="lg"] {
+    font-size: 1.3rem;
+    letter-spacing: 0.14em;
+  }
+
+  .section-kicker {
+    letter-spacing: 0.18em;
+  }
 }

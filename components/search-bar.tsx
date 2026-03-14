@@ -66,13 +66,13 @@ export default function SearchBar({
     <div className={className}>
       <form
         onSubmit={handleSearch}
-        className={`surface-card overflow-hidden rounded-[2rem] transition-all duration-200 ${
-          focused ? 'scale-[1.005] border-[#67F2FF]/35' : ''
+        className={`surface-card overflow-hidden rounded-[1.65rem] transition-all duration-200 sm:rounded-[2rem] ${
+          focused ? 'border-[#67F2FF]/35 sm:scale-[1.005]' : ''
         }`}
       >
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_220px_190px]">
-          <label className="flex items-center gap-3 px-5 py-4 sm:px-6">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white/62">
+          <label className="flex items-start gap-3 px-4 py-4 sm:items-center sm:px-6">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white/62 sm:h-11 sm:w-11">
               <svg
                 className="h-5 w-5"
                 viewBox="0 0 24 24"
@@ -101,7 +101,7 @@ export default function SearchBar({
           </label>
 
           <div className="border-t border-white/8 lg:border-l lg:border-t-0">
-            <label className="flex h-full items-center gap-3 px-5 py-4">
+            <label className="flex h-full items-center gap-3 px-4 py-4 sm:px-5">
               <div className="text-[10px] uppercase tracking-[0.22em] text-white/38">Category</div>
               <select
                 value={category}
@@ -117,10 +117,10 @@ export default function SearchBar({
             </label>
           </div>
 
-          <div className="border-t border-white/8 p-3 lg:border-l lg:border-t-0">
+          <div className="border-t border-white/8 p-2.5 lg:border-l lg:border-t-0 lg:p-3">
             <button
               type="submit"
-              className="brand-button h-full min-h-[54px] w-full rounded-[1.35rem] px-6 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
+              className="brand-button h-full min-h-[52px] w-full rounded-[1.15rem] px-6 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5 sm:min-h-[54px] sm:rounded-[1.35rem]"
             >
               Search Listings
             </button>

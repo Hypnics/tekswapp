@@ -137,7 +137,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Navbar />
       <main className="px-4 pb-20 pt-24">
         <div className="mx-auto max-w-6xl">
-          <nav className="mb-6 flex items-center gap-2 text-sm text-white/30">
+          <nav className="mb-6 flex flex-wrap items-center gap-2 overflow-hidden text-xs text-white/30 sm:text-sm">
             <Link href="/" className="transition-colors hover:text-white">
               Home
             </Link>
@@ -153,10 +153,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {listing.category}
             </Link>
             <span>/</span>
-            <span className="max-w-[200px] truncate text-white/50">{listing.title}</span>
+            <span className="min-w-0 max-w-full truncate text-white/50">{listing.title}</span>
           </nav>
 
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2">
             <div className="surface-card-soft relative aspect-square overflow-hidden rounded-2xl">
               <Image
                 src={imageSrc}
@@ -193,8 +193,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </h1>
               </div>
 
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-white">{formatPrice(listing.price, listing.currencyCode)}</span>
+              <div className="flex flex-wrap items-end gap-2 sm:gap-3">
+                <span className="text-3xl font-bold text-white sm:text-4xl">
+                  {formatPrice(listing.price, listing.currencyCode)}
+                </span>
                 {listing.originalPrice && (
                   <span className="text-lg text-white/30 line-through">
                     {formatPrice(listing.originalPrice, listing.currencyCode)}
@@ -203,7 +205,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(79,140,255,0.14),rgba(103,242,255,0.08))] p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-[#67F2FF]">Checkout details</p>
                     <p className="mt-2 text-sm text-white/78">
@@ -220,14 +222,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {[...baseSpecs, ...dynamicSpecs].map((spec) => (
                   <div
                     key={spec.label}
                     className="rounded-xl border border-white/8 bg-white/[0.08] px-4 py-3 backdrop-blur-sm"
                   >
                     <div className="mb-0.5 text-xs text-white/30">{spec.label}</div>
-                    <div className="text-sm font-medium text-white">{spec.value}</div>
+                    <div className="break-words text-sm font-medium text-white">{spec.value}</div>
                   </div>
                 ))}
               </div>
@@ -254,21 +256,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
 
               <div className="rounded-2xl border border-white/8 bg-white/[0.08] p-5 backdrop-blur-sm">
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-sm font-semibold text-white/70">Seller</h3>
                   {listing.seller.verified && (
                     <span className="text-xs text-[#22D3EE]">Verified Seller</span>
                   )}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2563EB]/30">
                     <span className="text-sm font-bold text-[#22D3EE]">
                       {listing.seller.name.charAt(0)}
                     </span>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-sm font-semibold text-white">{listing.seller.name}</div>
-                    <div className="mt-0.5 text-xs text-white/40">{sellerSummary}</div>
+                    <div className="mt-0.5 text-xs leading-relaxed text-white/40">
+                      {sellerSummary}
+                    </div>
                   </div>
                 </div>
                 {listing.sellerNotes && (
@@ -319,7 +323,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </div>
 
-          <div className="surface-card mt-10 rounded-2xl p-8">
+          <div className="surface-card mt-10 rounded-[1.85rem] p-5 sm:p-8">
             <h2 className="mb-4 text-lg font-semibold text-white">Description</h2>
             <p className="whitespace-pre-line text-sm leading-relaxed text-white/50">
               {listing.description}

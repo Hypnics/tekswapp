@@ -52,7 +52,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
       href={`/product/${listing.id}`}
       className="surface-card group overflow-hidden rounded-[1.85rem] transition-all duration-200 hover:-translate-y-1 hover:border-[#67F2FF]/24"
     >
-      <div className="relative h-56">
+      <div className="relative h-52 sm:h-56">
         <Image
           src={imageSrc}
           alt={listing.title}
@@ -66,7 +66,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           style={{ background: 'linear-gradient(to top, rgba(18,34,58,0.78), transparent)' }}
         />
 
-        <div className="absolute left-3 top-3 flex items-center gap-2">
+        <div className="absolute left-3 top-3 flex max-w-[calc(100%-5.75rem)] flex-wrap items-center gap-2">
           <span
             className="rounded-full px-2.5 py-1 text-[11px] font-medium"
             style={{ color: condition.color, background: condition.background }}
@@ -93,8 +93,8 @@ export default function ListingCard({ listing }: ListingCardProps) {
         )}
       </div>
 
-      <div className="space-y-4 p-5">
-        <div className="flex items-center justify-between gap-3">
+      <div className="space-y-4 p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-[11px] uppercase tracking-[0.18em] text-white/38">
             {listing.category}
           </span>
@@ -103,7 +103,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </span>
         </div>
 
-        <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug text-white">
+        <h3 className="line-clamp-2 text-base font-semibold leading-snug text-white sm:text-[17px]">
           {listing.title}
         </h3>
 
@@ -120,21 +120,21 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
         ) : null}
 
-        <div className="flex items-end gap-2">
-          <p className="text-2xl font-semibold text-white">{formatPrice(listing.price)}</p>
+        <div className="flex flex-wrap items-end gap-2">
+          <p className="text-xl font-semibold text-white sm:text-2xl">{formatPrice(listing.price)}</p>
           {listing.originalPrice && (
             <p className="pb-1 text-sm text-white/45 line-through">{formatPrice(listing.originalPrice)}</p>
           )}
         </div>
 
         <div className="border-t border-white/8 pt-4">
-          <div className="flex items-center justify-between gap-3 text-sm text-white/70">
+          <div className="flex items-start justify-between gap-3 text-sm text-white/70 sm:items-center">
             <span className="truncate pr-2">{listing.seller.name}</span>
             {listing.seller.verified ? (
               <span className="whitespace-nowrap text-xs text-[#67F2FF]">Verified</span>
             ) : null}
           </div>
-          <p className="mt-1 text-xs text-white/48">{sellerSummary}</p>
+          <p className="mt-1 text-xs leading-relaxed text-white/48">{sellerSummary}</p>
         </div>
       </div>
     </Link>

@@ -71,10 +71,16 @@ export default function Navbar() {
   const showAuthedActions = authReady && isAuthed
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-4">
-      <div className="mx-auto max-w-7xl rounded-[1.6rem] border border-white/10 bg-[rgba(15,35,62,0.68)] px-4 shadow-[0_16px_50px_rgba(6,14,31,0.18)] backdrop-blur-2xl sm:px-6">
-        <div className="flex h-[72px] items-center justify-between gap-4">
-          <BrandMark href="/" size="md" subtitle="Buy & Sell Used Tech" className="shrink-0" />
+    <nav className="fixed left-0 right-0 top-0 z-50 px-2.5 pt-2.5 sm:px-4 sm:pt-3">
+      <div className="mx-auto max-w-7xl rounded-[1.45rem] border border-white/10 bg-[rgba(15,35,62,0.68)] px-3 shadow-[0_16px_50px_rgba(6,14,31,0.18)] backdrop-blur-2xl sm:rounded-[1.6rem] sm:px-6">
+        <div className="flex h-[64px] items-center justify-between gap-3 sm:h-[72px] sm:gap-4">
+          <BrandMark
+            href="/"
+            size="md"
+            subtitle="Buy & Sell Used Tech"
+            compactOnMobile
+            className="min-w-0"
+          />
 
           <div className="hidden min-w-0 items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1 md:flex">
             {desktopLinks.map((link) => (
@@ -127,7 +133,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
-            className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-full border border-white/10 bg-white/[0.03] md:hidden"
+            className="flex h-9 w-9 shrink-0 flex-col items-center justify-center gap-[5px] rounded-full border border-white/10 bg-white/[0.03] md:hidden sm:h-10 sm:w-10"
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
           >
@@ -150,7 +156,7 @@ export default function Navbar() {
         </div>
 
         {mobileOpen ? (
-          <div className="border-t border-white/8 pb-5 pt-4 md:hidden">
+          <div className="max-h-[calc(100vh-5.25rem)] overflow-y-auto border-t border-white/8 pb-4 pt-4 md:hidden sm:pb-5">
             <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <p className="text-[11px] uppercase tracking-[0.22em] text-white/42">
                 Buying made simpler

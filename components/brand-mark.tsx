@@ -6,6 +6,7 @@ interface BrandMarkProps {
   className?: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
   subtitle?: string
+  compactOnMobile?: boolean
 }
 
 function BrandText({ size }: { size: BrandMarkProps['size'] }) {
@@ -17,17 +18,34 @@ function BrandText({ size }: { size: BrandMarkProps['size'] }) {
   )
 }
 
-function BrandContent({ size = 'md', subtitle }: Omit<BrandMarkProps, 'href' | 'className'>) {
-  const iconSize =
-    size === 'xl' ? 'h-16 w-16 rounded-[1.35rem]' : size === 'lg' ? 'h-12 w-12' : 'h-10 w-10'
+function BrandContent({
+  size = 'md',
+  subtitle,
+  compactOnMobile = false,
+}: Omit<BrandMarkProps, 'href' | 'className'>) {
+  const iconSize = compactOnMobile
+    ? size === 'xl'
+      ? 'h-14 w-14 rounded-[1.2rem] sm:h-16 sm:w-16 sm:rounded-[1.35rem]'
+      : size === 'lg'
+        ? 'h-10 w-10 sm:h-12 sm:w-12'
+        : 'h-8 w-8 sm:h-10 sm:w-10'
+    : size === 'xl'
+      ? 'h-16 w-16 rounded-[1.35rem]'
+      : size === 'lg'
+        ? 'h-12 w-12'
+        : 'h-10 w-10'
 
   return (
     <>
       <IconMark className={iconSize} />
-      <span className="flex flex-col gap-1">
+      <span className="min-w-0 flex flex-col gap-1">
         <BrandText size={size} />
         {subtitle ? (
-          <span className="text-[10px] uppercase tracking-[0.3em] text-white/46 sm:text-[11px]">
+          <span
+            className={`max-w-full text-[10px] leading-tight uppercase text-white/46 tracking-[0.22em] sm:text-[11px] sm:tracking-[0.3em] ${
+              compactOnMobile ? 'hidden sm:block' : 'block'
+            }`}
+          >
             {subtitle}
           </span>
         ) : null}
@@ -41,8 +59,9 @@ export default function BrandMark({
   className = '',
   size = 'md',
   subtitle,
+  compactOnMobile = false,
 }: BrandMarkProps) {
-  const content = <BrandContent size={size} subtitle={subtitle} />
+  const content = <BrandContent size={size} subtitle={subtitle} compactOnMobile={compactOnMobile} />
 
   if (!href) {
     return <div className={`inline-flex items-center gap-3 ${className}`}>{content}</div>
