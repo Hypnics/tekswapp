@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
+import Footer from '@/components/footer'
 import DashboardShell from '@/components/dashboard/dashboard-shell'
+import { attachPriceDisplays, getCurrencyPresenter } from '@/lib/currency/presenter'
 import { buildEmptyProfile } from '@/lib/dashboard-data'
 import { loadDashboardSnapshot } from '@/lib/dashboard-server'
 import { createClient } from '@/lib/supabase/server'
@@ -8,7 +10,7 @@ import { DashboardSection, DashboardSnapshot } from '@/types/dashboard'
 const supabaseConfigured =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https://') ?? false
 
-const allowedSections: DashboardSection[] = [
+const baseSections: DashboardSection[] = [
   'overview',
   'listings',
   'sales',
@@ -27,6 +29,17 @@ function fallbackSnapshot(): DashboardSnapshot {
     generatedAt: new Date().toISOString(),
     profile,
     listings: [],
+    privilegedAccess: {
+      role: null,
+      canReviewListings: false,
+      moderationPath: null,
+    },
+    moderationQueue: [],
+    moderationSummary: {
+      pendingReview: 0,
+      activeListings: 0,
+      draftListings: 0,
+    },
     sales: [],
     purchases: [],
   }
@@ -54,6 +67,16 @@ export default async function DashboardPage({
     snapshot = await loadDashboardSnapshot(supabase, authUser)
   }
 
+  const presenter = await getCurrencyPresenter()
+  snapshot = {
+    ...snapshot,
+    listings: snapshot.listings.map((listing) => attachPriceDisplays(listing, presenter)),
+    moderationQueue: snapshot.moderationQueue.map((listing) => attachPriceDisplays(listing, presenter)),
+  }
+
+  const allowedSections: DashboardSection[] = snapshot.privilegedAccess.canReviewListings
+    ? [...baseSections, 'moderation']
+    : baseSections
   const requestedTab = Array.isArray(searchParams.tab) ? searchParams.tab[0] : searchParams.tab
   const initialSection = allowedSections.includes(requestedTab as DashboardSection)
     ? (requestedTab as DashboardSection)
@@ -109,10 +132,13 @@ export default async function DashboardPage({
             : undefined
 
   return (
-    <DashboardShell
-      snapshot={snapshot}
-      initialSection={initialSection}
-      notice={notice}
-    />
+    <>
+      <DashboardShell
+        snapshot={snapshot}
+        initialSection={initialSection}
+        notice={notice}
+      />
+      <Footer />
+    </>
   )
 }

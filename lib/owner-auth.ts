@@ -1,10 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-
-interface OwnerRecord {
-  user_id: string
-  email: string
-}
+import { getPrivilegedAccess } from '@/lib/privileged-access'
 
 type OwnerAuthCode = 'unauthenticated' | 'forbidden'
 
@@ -15,28 +11,6 @@ export class OwnerAuthError extends Error {
     super(code === 'unauthenticated' ? 'Owner authentication required.' : 'Owner access denied.')
     this.code = code
   }
-}
-
-function parseOwnerEmailAllowlist(): Set<string> {
-  const raw = process.env.TEKSWAPP_OWNER_EMAILS ?? ''
-  const emails = raw
-    .split(',')
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean)
-
-  return new Set(emails)
-}
-
-function isMissingOwnerAccountsTableError(error: { code?: string; message?: string } | null): boolean {
-  if (!error) return false
-  const knownCodes = new Set(['PGRST205', '42P01'])
-  if (error.code && knownCodes.has(error.code)) return true
-
-  const message = (error.message ?? '').toLowerCase()
-  return (
-    message.includes("could not find the table 'public.owner_accounts'") ||
-    message.includes('relation "owner_accounts" does not exist')
-  )
 }
 
 export async function requireOwnerContext(options?: { redirectToAuth?: boolean; nextPath?: string }) {
@@ -53,28 +27,14 @@ export async function requireOwnerContext(options?: { redirectToAuth?: boolean; 
     throw new OwnerAuthError('unauthenticated')
   }
 
-  const allowlist = parseOwnerEmailAllowlist()
-  const emailAllowed = Boolean(user.email && allowlist.has(user.email.toLowerCase()))
+  const access = await getPrivilegedAccess(supabase, user)
 
-  const { data: ownerRecord, error } = await supabase
-    .from('owner_accounts')
-    .select('user_id,email')
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  if (error && !isMissingOwnerAccountsTableError(error)) {
-    throw new Error(error.message)
-  }
-
-  const tableAllowed = Boolean(ownerRecord)
-
-  if (!emailAllowed && !tableAllowed) {
+  if (!access.isOwner) {
     throw new OwnerAuthError('forbidden')
   }
 
   return {
     supabase,
     user,
-    ownerRecord: (ownerRecord as OwnerRecord | null) ?? null,
   }
 }

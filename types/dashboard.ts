@@ -1,8 +1,10 @@
+import type { MoneyDisplay } from '@/lib/currency/presenter'
 import { Condition } from '@/types/listing'
 
 export type DashboardSection =
   | 'overview'
   | 'listings'
+  | 'moderation'
   | 'sales'
   | 'purchases'
   | 'verification'
@@ -12,6 +14,7 @@ export type ListingWorkflowStatus = 'active' | 'draft' | 'sold' | 'pending_revie
 export type ShippingStatus = 'label_created' | 'in_transit' | 'delivered'
 export type PayoutStatus = 'on_hold' | 'processing' | 'released'
 export type PurchaseStatus = 'processing' | 'shipped' | 'delivered'
+export type PrivilegedDashboardRole = 'owner' | 'staff'
 
 export type ProfileVerificationStatus = 'unverified' | 'in_review' | 'verified' | 'rejected'
 export type VerificationStepStatus = 'complete' | 'pending' | 'incomplete'
@@ -38,12 +41,40 @@ export interface DashboardListing {
   title: string
   category: string
   price: number
+  currencyCode: string
   condition: Condition
   status: ListingWorkflowStatus
   image: string
   views: number
   watchers: number
   updatedAt: string
+  priceDisplay?: MoneyDisplay
+}
+
+export interface DashboardPrivilegedAccess {
+  role: PrivilegedDashboardRole | null
+  canReviewListings: boolean
+  moderationPath: '/admin' | '/staff' | null
+}
+
+export interface ModerationQueueListing {
+  id: string
+  title: string
+  category: string
+  condition: Condition
+  price: number
+  currencyCode: string
+  image: string
+  sellerId: string
+  sellerName: string
+  createdAt: string
+  priceDisplay?: MoneyDisplay
+}
+
+export interface ModerationSummary {
+  pendingReview: number
+  activeListings: number
+  draftListings: number
 }
 
 export interface SaleOrder {
@@ -87,6 +118,9 @@ export interface DashboardSnapshot {
   generatedAt: string
   profile: ProfileRecord
   listings: DashboardListing[]
+  privilegedAccess: DashboardPrivilegedAccess
+  moderationQueue: ModerationQueueListing[]
+  moderationSummary: ModerationSummary
   sales: SaleOrder[]
   purchases: PurchaseOrder[]
 }

@@ -5,12 +5,17 @@ import Navbar from '@/components/navbar'
 import SellerListingWizard from '@/components/seller-listing-wizard'
 import { canUserPublishListings } from '@/lib/dashboard-data'
 import { getOrCreateProfile } from '@/lib/dashboard-server'
+import { getSellerEditableListingById } from '@/lib/marketplace'
 import { createClient } from '@/lib/supabase/server'
 
 const supabaseConfigured =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https://') ?? false
 
-export default async function SellPage() {
+export default async function SellPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ edit?: string | string[] }>
+}) {
   if (!supabaseConfigured) {
     return (
       <div className="page-shell text-white">
@@ -37,6 +42,17 @@ export default async function SellPage() {
 
   const profile = await getOrCreateProfile(supabase, user)
   const sellerReady = canUserPublishListings(profile, Boolean(user.email_confirmed_at))
+  const resolvedSearchParams = searchParams ? await searchParams : undefined
+  const editParam = Array.isArray(resolvedSearchParams?.edit)
+    ? resolvedSearchParams?.edit[0]
+    : resolvedSearchParams?.edit
+  const initialListing = editParam
+    ? await getSellerEditableListingById(supabase, user.id, editParam)
+    : null
+
+  if (editParam && !initialListing) {
+    redirect('/dashboard?tab=listings')
+  }
 
   if (!sellerReady) {
     return (
@@ -66,7 +82,7 @@ export default async function SellPage() {
     <div className="page-shell text-white">
       <Navbar />
       <main className="relative mx-auto max-w-5xl px-4 pb-20 pt-28">
-        <SellerListingWizard />
+        <SellerListingWizard initialListing={initialListing ?? undefined} />
       </main>
       <Footer />
     </div>

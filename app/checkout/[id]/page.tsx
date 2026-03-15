@@ -6,6 +6,7 @@ import Navbar from '@/components/navbar'
 import CheckoutExperience from '@/components/checkout/checkout-experience'
 import { getAllowedShippingCountries, getListingCheckoutAvailability, resolveShippingRate } from '@/lib/checkout'
 import { getCountryName } from '@/lib/countries'
+import { getCurrencyPresenter } from '@/lib/currency/presenter'
 import { getMarketplaceListingById } from '@/lib/marketplace'
 import { createClient } from '@/lib/supabase/server'
 
@@ -30,7 +31,10 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   const { id } = await params
   const { cancelled } = await searchParams
 
-  const listing = await getMarketplaceListingById(id)
+  const [listing, presenter] = await Promise.all([
+    getMarketplaceListingById(id),
+    getCurrencyPresenter(),
+  ])
   if (!listing || listing.status !== 'active') {
     redirect('/listings')
   }
@@ -56,6 +60,8 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
         name: getCountryName(code),
         amount: rate.amount,
         label: rate.label,
+        priceDisplay: presenter.money(rate.amount, listing.currencyCode),
+        estimatedTotalDisplay: presenter.money(listing.price + rate.amount, listing.currencyCode),
       }
     })
     .filter((choice): choice is NonNullable<typeof choice> => Boolean(choice))
@@ -63,6 +69,18 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   if (shippingChoices.length === 0) {
     redirect(`/product/${listing.id}`)
   }
+
+  const defaultShippingCountry =
+    shippingChoices.find((choice) => choice.code === presenter.preference.countryCode)?.code ??
+    shippingChoices[0]?.code ??
+    ''
+  const priceDisplay = presenter.money(listing.price, listing.currencyCode)
+  const checkoutCurrencyNote =
+    presenter.preference.source === 'manual' && presenter.preference.manualCurrency !== presenter.preference.detectedCurrency
+      ? `Browsing in ${presenter.preference.currency} from your saved override. Stripe will still localize checkout from the buyer region when supported.`
+      : priceDisplay.isConverted
+        ? `Prices are shown in ${presenter.preference.currency} for browsing. Final Stripe currency can differ if local presentment is unavailable for this checkout.`
+        : `Checkout is shown in the listing base currency. Stripe will localize when the buyer region is eligible.`
 
   return (
     <div className="page-shell min-h-screen text-white">
@@ -93,17 +111,19 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
                 id: listing.id,
                 title: listing.title,
                 image: listing.image,
-                price: listing.price,
                 condition: listing.condition,
                 category: listing.category,
                 brand: listing.brand,
                 model: listing.model,
                 sellerName: listing.seller.name,
-                currencyCode: listing.currencyCode,
+                priceDisplay,
               }}
               buyerEmail={user.email ?? 'Buyer'}
               shippingChoices={shippingChoices}
               cancelled={cancelled === '1'}
+              defaultShippingCountry={defaultShippingCountry}
+              checkoutCurrencyNote={checkoutCurrencyNote}
+              activeCurrency={presenter.preference.currency}
             />
           )}
         </div>

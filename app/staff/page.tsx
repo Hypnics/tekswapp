@@ -12,6 +12,7 @@ type StaffListingRow = {
   category: string
   condition: string
   price: number
+  currency_code: string | null
   image: string | null
   image_url: string | null
   seller_name: string
@@ -19,7 +20,8 @@ type StaffListingRow = {
   created_at: string
 }
 
-const LISTING_COLUMNS = 'id,title,category,condition,price,image,image_url,seller_name,seller_id,created_at'
+const LISTING_COLUMNS =
+  'id,title,category,condition,price,currency_code,image,image_url,seller_name,seller_id,created_at'
 
 export const metadata: Metadata = {
   title: 'TekSwapp Staff Review',
@@ -144,7 +146,7 @@ export default async function StaffPage() {
                         </div>
 
                         <div className="grid grid-cols-1 gap-1 text-sm text-white/70 sm:grid-cols-2">
-                          <p>Price: {formatPrice(listing.price, 'USD')}</p>
+                          <p>Price: {formatPrice(listing.price, listing.currency_code ?? 'USD')}</p>
                           <p>Seller: {listing.seller_name}</p>
                           <p>Submitted: {formatDate(listing.created_at)}</p>
                           <p className="truncate">Seller ID: {listing.seller_id}</p>

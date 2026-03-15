@@ -1,19 +1,29 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import PriceDisplay from '@/components/currency/price-display'
 import { normalizeImageSrc } from '@/lib/image-src'
-import { formatPrice, getDiscount } from '@/lib/utils'
+import type { MoneyDisplay } from '@/lib/currency/presenter'
+import { getDiscount } from '@/lib/utils'
 import { Listing } from '@/types/listing'
 
 interface ListingCardProps {
-  listing: Listing
+  listing: Listing & {
+    priceDisplay: MoneyDisplay
+    originalPriceDisplay?: MoneyDisplay
+  }
 }
 
 const conditionStyles: Record<string, { text: string; color: string; background: string }> = {
   New: { text: 'New', color: '#22D3EE', background: 'rgba(34,211,238,0.14)' },
   'Like New': { text: 'Like New', color: '#22D3EE', background: 'rgba(34,211,238,0.14)' },
+  Excellent: { text: 'Excellent', color: '#7dd3fc', background: 'rgba(125,211,252,0.14)' },
   Good: { text: 'Good', color: '#93c5fd', background: 'rgba(147,197,253,0.12)' },
   Fair: { text: 'Fair', color: '#fbbf24', background: 'rgba(251,191,36,0.12)' },
-  Poor: { text: 'Poor', color: '#fca5a5', background: 'rgba(252,165,165,0.12)' },
+  'For Parts / Not Working': {
+    text: 'For Parts / Not Working',
+    color: '#fca5a5',
+    background: 'rgba(252,165,165,0.12)',
+  },
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
@@ -91,6 +101,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
             Save {discount}%
           </span>
         )}
+
+        {listing.images.length > 1 && (
+          <span className="absolute bottom-3 right-3 rounded-full border border-white/12 bg-[#091427]/82 px-2.5 py-1 text-[11px] font-medium text-white">
+            {listing.images.length} photos
+          </span>
+        )}
       </div>
 
       <div className="space-y-4 p-4 sm:p-5">
@@ -120,12 +136,13 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
         ) : null}
 
-        <div className="flex flex-wrap items-end gap-2">
-          <p className="text-xl font-semibold text-white sm:text-2xl">{formatPrice(listing.price)}</p>
-          {listing.originalPrice && (
-            <p className="pb-1 text-sm text-white/45 line-through">{formatPrice(listing.originalPrice)}</p>
-          )}
-        </div>
+        <PriceDisplay
+          money={listing.priceDisplay}
+          originalMoney={listing.originalPriceDisplay}
+          amountClassName="text-xl font-semibold text-white sm:text-2xl"
+          originalAmountClassName="pb-1 text-sm text-white/45 line-through"
+          metaClassName="mt-1 text-xs text-white/48"
+        />
 
         <div className="border-t border-white/8 pt-4">
           <div className="flex items-start justify-between gap-3 text-sm text-white/70 sm:items-center">

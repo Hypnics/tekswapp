@@ -5,6 +5,7 @@ import { DashboardSection } from '@/types/dashboard'
 interface DashboardSidebarProps {
   activeSection: DashboardSection
   onNavigate: (section: DashboardSection) => void
+  showModeration: boolean
   displayName: string
   displayEmail: string
   verificationProgress: number
@@ -15,7 +16,7 @@ interface DashboardSidebarProps {
   sectionBadges: Partial<Record<DashboardSection, string>>
 }
 
-const navItems: { id: DashboardSection; label: string; description: string }[] = [
+const baseNavItems: { id: DashboardSection; label: string; description: string }[] = [
   { id: 'overview', label: 'Overview', description: 'Pulse and priorities' },
   { id: 'listings', label: 'My Listings', description: 'Inventory and drafts' },
   { id: 'sales', label: 'Sales', description: 'Orders and payouts' },
@@ -24,9 +25,21 @@ const navItems: { id: DashboardSection; label: string; description: string }[] =
   { id: 'settings', label: 'Settings', description: 'Profile and account' },
 ]
 
+function buildNavItems(showModeration: boolean): { id: DashboardSection; label: string; description: string }[] {
+  if (!showModeration) return baseNavItems
+
+  return [
+    baseNavItems[0],
+    baseNavItems[1],
+    { id: 'moderation', label: 'Review Queue', description: 'Owner and staff approvals' },
+    ...baseNavItems.slice(2),
+  ]
+}
+
 export default function DashboardSidebar({
   activeSection,
   onNavigate,
+  showModeration,
   displayName,
   displayEmail,
   verificationProgress,
@@ -37,6 +50,7 @@ export default function DashboardSidebar({
   sectionBadges,
 }: DashboardSidebarProps) {
   const initial = displayName.trim().charAt(0).toUpperCase() || 'T'
+  const navItems = buildNavItems(showModeration)
 
   return (
     <>

@@ -11,6 +11,7 @@ import {
 } from '@/lib/dashboard-data'
 import DashboardSidebar from '@/components/dashboard/dashboard-sidebar'
 import ListingsPanel from '@/components/dashboard/listings-panel'
+import ModerationPanel from '@/components/dashboard/moderation-panel'
 import OverviewPanel from '@/components/dashboard/overview-panel'
 import PurchasesPanel from '@/components/dashboard/purchases-panel'
 import SalesPanel from '@/components/dashboard/sales-panel'
@@ -38,6 +39,10 @@ const sectionMeta: Record<DashboardSection, { title: string; subtitle: string }>
   listings: {
     title: 'My Listings',
     subtitle: 'Manage active, draft, sold, and review-pending inventory.',
+  },
+  moderation: {
+    title: 'Review Queue',
+    subtitle: 'Owner and staff accounts can review submissions before they hit the marketplace.',
   },
   sales: {
     title: 'Sales',
@@ -124,11 +129,22 @@ export default function DashboardShell({
   const sectionBadges = useMemo<Partial<Record<DashboardSection, string>>>(
     () => ({
       listings: snapshot.listings.length.toString(),
+      moderation: snapshot.privilegedAccess.canReviewListings
+        ? snapshot.moderationSummary.pendingReview.toString()
+        : undefined,
       sales: snapshot.sales.length.toString(),
       purchases: snapshot.purchases.length.toString(),
       verification: sellerReady ? 'Ready' : pendingActions.toString(),
     }),
-    [pendingActions, sellerReady, snapshot.listings.length, snapshot.purchases.length, snapshot.sales.length]
+    [
+      pendingActions,
+      sellerReady,
+      snapshot.listings.length,
+      snapshot.moderationSummary.pendingReview,
+      snapshot.privilegedAccess.canReviewListings,
+      snapshot.purchases.length,
+      snapshot.sales.length,
+    ]
   )
 
   const summaryCards = useMemo(
@@ -216,6 +232,7 @@ export default function DashboardShell({
         <DashboardSidebar
           activeSection={activeSection}
           onNavigate={openSection}
+          showModeration={snapshot.privilegedAccess.canReviewListings}
           displayName={snapshot.displayName}
           displayEmail={snapshot.email}
           verificationProgress={verificationProgress}
@@ -281,6 +298,15 @@ export default function DashboardShell({
                     <Link href="/listings" className="ghost-button rounded-xl px-4 py-2 text-sm font-semibold text-white/94">
                       Browse marketplace
                     </Link>
+                    {snapshot.privilegedAccess.canReviewListings && (
+                      <button
+                        type="button"
+                        onClick={() => openSection('moderation')}
+                        className="ghost-button rounded-xl px-4 py-2 text-sm font-semibold text-white/94"
+                      >
+                        Open review queue
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={refreshDashboard}
@@ -340,6 +366,15 @@ export default function DashboardShell({
                 listings={snapshot.listings}
                 canPublish={sellerReady}
                 onRequireVerification={() => openSection('verification')}
+              />
+            )}
+
+            {activeSection === 'moderation' && snapshot.privilegedAccess.role && (
+              <ModerationPanel
+                role={snapshot.privilegedAccess.role}
+                workspacePath={snapshot.privilegedAccess.moderationPath}
+                listings={snapshot.moderationQueue}
+                summary={snapshot.moderationSummary}
               />
             )}
 

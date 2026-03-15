@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
+import PriceDisplay from '@/components/currency/price-display'
 import Footer from '@/components/footer'
 import Navbar from '@/components/navbar'
+import ProductGallery from '@/components/product/product-gallery'
+import { formatDisplayMoneyLabel, getCurrencyPresenter } from '@/lib/currency/presenter'
 import { getAllowedShippingCountries, resolveShippingRate } from '@/lib/checkout'
-import { normalizeImageSrc } from '@/lib/image-src'
+import { getListingSpecFields, getListingSpecLabel } from '@/lib/marketplace-config'
 import { getMarketplaceListingById } from '@/lib/marketplace'
-import { formatDate, formatPrice } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 
 interface ProductPageProps {
   params: Promise<{ id: string }>
@@ -15,14 +17,18 @@ interface ProductPageProps {
 const conditionColor: Record<string, string> = {
   New: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-400',
   'Like New': 'border-[#22D3EE]/20 bg-[#22D3EE]/10 text-[#22D3EE]',
+  Excellent: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
   Good: 'border-yellow-400/20 bg-yellow-400/10 text-yellow-400',
   Fair: 'border-orange-400/20 bg-orange-400/10 text-orange-400',
-  Poor: 'border-red-400/20 bg-red-400/10 text-red-400',
+  'For Parts / Not Working': 'border-red-400/20 bg-red-400/10 text-red-400',
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { id } = await params
-  const listing = await getMarketplaceListingById(id)
+  const [listing, presenter] = await Promise.all([
+    getMarketplaceListingById(id),
+    getCurrencyPresenter(),
+  ])
 
   if (!listing) {
     return {
@@ -32,7 +38,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   const title = `${listing.title} | TekSwapp`
-  const description = `Shop ${listing.condition.toLowerCase()} ${listing.title} on TekSwapp for ${formatPrice(listing.price, listing.currencyCode)} with clear listing details and seller information.`
+  const priceDisplay = presenter.money(listing.price, listing.currencyCode)
+  const description = `Shop ${listing.condition.toLowerCase()} ${listing.title} on TekSwapp for ${priceDisplay.isApproximate ? `approximately ${priceDisplay.formatted}` : priceDisplay.formatted} with clear listing details and seller information.`
 
   return {
     title,
@@ -82,14 +89,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
     )
   }
 
-  const imageSrc = normalizeImageSrc(listing.image)
   const shippingChoices = getAllowedShippingCountries(listing)
     .map((code) => resolveShippingRate(listing, code))
     .filter((rate): rate is NonNullable<ReturnType<typeof resolveShippingRate>> => Boolean(rate))
+  const presenter = await getCurrencyPresenter()
+  const priceDisplay = presenter.money(listing.price, listing.currencyCode)
+  const originalPriceDisplay = listing.originalPrice
+    ? presenter.money(listing.originalPrice, listing.currencyCode)
+    : undefined
   const cheapestShipping =
     shippingChoices.length > 0
       ? shippingChoices.reduce((lowest, rate) => Math.min(lowest, rate.amount), shippingChoices[0].amount)
       : null
+  const cheapestShippingDisplay =
+    cheapestShipping !== null ? presenter.money(cheapestShipping, listing.currencyCode) : null
   const checkoutReady = shippingChoices.length > 0
   const sellerSaleLabel = listing.seller.totalSales === 1 ? 'sale' : 'sales'
   const sellerSummary =
@@ -123,14 +136,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
       : []),
   ]
 
-  const dynamicSpecs = Object.entries(listing.deviceSpecs ?? {})
-    .filter(([key]) => !['storage', 'battery_health', 'color'].includes(key))
+  const configuredSpecFields = getListingSpecFields(listing.category, {
+    brand: listing.brand,
+    model: listing.model,
+    specs: listing.deviceSpecs,
+  })
+  const configuredDynamicSpecs = configuredSpecFields
+    .filter((field) => !['storage', 'battery_health', 'color'].includes(field.key))
+    .map((field) => ({
+      key: field.key,
+      label: field.label,
+      value: listing.deviceSpecs?.[field.key]?.trim() ?? '',
+    }))
+    .filter((spec) => spec.value)
+  const configuredDynamicKeys = new Set(configuredDynamicSpecs.map((spec) => spec.key))
+  const unknownDynamicSpecs = Object.entries(listing.deviceSpecs ?? {})
+    .filter(([key, value]) => !['storage', 'battery_health', 'color'].includes(key) && Boolean(value.trim()))
+    .filter(([key]) => !configuredDynamicKeys.has(key))
     .map(([key, value]) => ({
-      label: key
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (char) => char.toUpperCase()),
+      key,
+      label: getListingSpecLabel(listing.category, key),
       value,
     }))
+  const dynamicSpecs = [...configuredDynamicSpecs, ...unknownDynamicSpecs]
 
   return (
     <div className="page-shell min-h-screen text-white">
@@ -157,22 +185,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </nav>
 
           <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2">
-            <div className="surface-card-soft relative aspect-square overflow-hidden rounded-2xl">
-              <Image
-                src={imageSrc}
-                alt={listing.title}
-                fill
-                unoptimized
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              {listing.verified && (
-                <div className="absolute left-4 top-4 rounded-full bg-[#2563EB]/90 px-3 py-1.5 text-xs font-semibold text-white">
-                  TekSwapp Verified
-                </div>
-              )}
-            </div>
+            <ProductGallery images={listing.images.length ? listing.images : [listing.image]} title={listing.title} verified={listing.verified} />
 
             <div className="flex flex-col gap-6">
               <div>
@@ -182,27 +195,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   >
                     {listing.condition}
                   </span>
-                  {listing.imeiStatus && (
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-400">
-                      IMEI: {listing.imeiStatus}
-                    </span>
-                  )}
+                  {listing.images.length > 1 ? <span className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1 text-xs text-white/75">{listing.images.length} photos</span> : null}
                 </div>
                 <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl">
                   {listing.title}
                 </h1>
               </div>
 
-              <div className="flex flex-wrap items-end gap-2 sm:gap-3">
-                <span className="text-3xl font-bold text-white sm:text-4xl">
-                  {formatPrice(listing.price, listing.currencyCode)}
-                </span>
-                {listing.originalPrice && (
-                  <span className="text-lg text-white/30 line-through">
-                    {formatPrice(listing.originalPrice, listing.currencyCode)}
-                  </span>
-                )}
-              </div>
+              <PriceDisplay
+                money={priceDisplay}
+                originalMoney={originalPriceDisplay}
+                amountClassName="text-3xl font-bold text-white sm:text-4xl"
+                originalAmountClassName="text-lg text-white/30 line-through"
+                metaClassName="mt-2 text-sm text-white/52"
+              />
 
               <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(79,140,255,0.14),rgba(103,242,255,0.08))] p-5">
                 <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -210,14 +216,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     <p className="text-[11px] uppercase tracking-[0.18em] text-[#67F2FF]">Checkout details</p>
                     <p className="mt-2 text-sm text-white/78">
                       {checkoutReady
-                        ? cheapestShipping !== null
-                          ? `Shipping starts at ${formatPrice(cheapestShipping, listing.currencyCode)} and tax is calculated by Stripe from the buyer address.`
+                        ? cheapestShippingDisplay
+                          ? `Shipping starts at ${formatDisplayMoneyLabel(cheapestShippingDisplay)} and tax is calculated by Stripe from the buyer address.`
                           : 'Shipping and tax are calculated during checkout.'
                         : 'Seller shipping is not configured yet, so secure checkout is currently unavailable.'}
                     </p>
+                    <p className="mt-2 text-xs text-white/52">
+                      Stripe will attempt to localize the final payment currency for the buyer region when Adaptive Pricing is eligible. If not, checkout falls back to the seller&apos;s base currency.
+                    </p>
                   </div>
                   <p className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-xs text-white/70">
-                    Local currency shown in Stripe when supported
+                    Viewing in {presenter.preference.currency}
                   </p>
                 </div>
               </div>
@@ -240,7 +249,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     href={`/checkout/${listing.id}`}
                     className="flex-1 rounded-xl bg-[#2563EB] px-6 py-4 text-center text-sm font-bold text-white transition-all hover:bg-blue-500"
                   >
-                    Buy with secure checkout - {formatPrice(listing.price, listing.currencyCode)}
+                    Buy with secure checkout - {priceDisplay.formatted}
                   </Link>
                 ) : (
                   <span className="flex-1 rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-center text-sm font-bold text-white/55">

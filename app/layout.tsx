@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Manrope, Sora } from 'next/font/google'
+import { CurrencyProvider } from '@/components/currency/currency-provider'
+import { getCurrencyPreference } from '@/lib/currency/server'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
@@ -56,15 +58,17 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const currencyPreference = await getCurrencyPreference()
+
   return (
     <html lang="en">
       <body className={`${manrope.variable} ${sora.variable} bg-[var(--background)] text-[var(--text)]`}>
-        {children}
+        <CurrencyProvider initialPreference={currencyPreference}>{children}</CurrencyProvider>
       </body>
     </html>
   )

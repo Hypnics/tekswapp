@@ -4,6 +4,11 @@ import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import ListingCard from '@/components/listing-card'
 import SearchBar from '@/components/search-bar'
+import {
+  attachPriceDisplays,
+  formatDisplayMoneyLabel,
+  getCurrencyPresenter,
+} from '@/lib/currency/presenter'
 import { getMarketplaceListings } from '@/lib/marketplace'
 import {
   LISTING_CONDITIONS,
@@ -86,13 +91,31 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
     sort,
   }
 
-  const filtered = await getMarketplaceListings({
-    q: query,
-    category,
-    condition,
-    verified: verifiedOnly ? 'true' : undefined,
-    sort,
-  })
+  const [filtered, presenter] = await Promise.all([
+    getMarketplaceListings({
+      q: query,
+      category,
+      condition,
+      verified: verifiedOnly ? 'true' : undefined,
+      sort,
+    }),
+    getCurrencyPresenter(),
+  ])
+  const listingsWithDisplayPrice = filtered.map((listing) => attachPriceDisplays(listing, presenter))
+  const sortedListings =
+    sort === 'price_asc'
+      ? [...listingsWithDisplayPrice].sort(
+          (left, right) =>
+            left.priceDisplay.displayAmount - right.priceDisplay.displayAmount ||
+            new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+        )
+      : sort === 'price_desc'
+        ? [...listingsWithDisplayPrice].sort(
+            (left, right) =>
+              right.priceDisplay.displayAmount - left.priceDisplay.displayAmount ||
+              new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+          )
+        : listingsWithDisplayPrice
 
   const activeCategoryLabel = category ?? 'All Categories'
   const activeFilters = [
@@ -112,17 +135,28 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
       ? [{ label: getSortLabel(sort), href: withUpdates(currentUrlState, { sort: undefined }) }]
       : []),
   ]
-  const verifiedCount = filtered.filter((listing) => listing.seller.verified).length
+  const verifiedCount = sortedListings.filter((listing) => listing.seller.verified).length
   const lowestPrice =
-    filtered.length > 0 ? filtered.reduce((min, listing) => Math.min(min, listing.price), filtered[0].price) : 0
+    sortedListings.length > 0
+      ? sortedListings.reduce(
+          (min, listing) => Math.min(min, listing.priceDisplay.displayAmount),
+          sortedListings[0].priceDisplay.displayAmount
+        )
+      : 0
   const highestPrice =
-    filtered.length > 0 ? filtered.reduce((max, listing) => Math.max(max, listing.price), filtered[0].price) : 0
+    sortedListings.length > 0
+      ? sortedListings.reduce(
+          (max, listing) => Math.max(max, listing.priceDisplay.displayAmount),
+          sortedListings[0].priceDisplay.displayAmount
+        )
+      : 0
+  const approximateRange = sortedListings.some((listing) => listing.priceDisplay.isApproximate)
   const priceRangeLabel =
-    filtered.length === 0
+    sortedListings.length === 0
       ? 'No data'
       : lowestPrice === highestPrice
-        ? formatPrice(lowestPrice)
-        : `${formatPrice(lowestPrice)} - ${formatPrice(highestPrice)}`
+        ? formatDisplayMoneyLabel(sortedListings[0].priceDisplay)
+        : `${approximateRange ? 'Approx. ' : ''}${formatPrice(lowestPrice, presenter.preference.currency, presenter.preference.locale)} - ${formatPrice(highestPrice, presenter.preference.currency, presenter.preference.locale)}`
   const hasActiveFilters = activeFilters.length > 0
   const quickBrowseCategories = MARKETPLACE_CATEGORIES.filter((value) => value !== 'Other')
 
@@ -143,6 +177,14 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                 <p className="section-copy mt-3 max-w-3xl text-sm leading-relaxed sm:text-base">
                   Search live inventory, narrow by condition, and compare the details that matter
                   before you buy.
+                </p>
+                <p className="mt-4 text-xs uppercase tracking-[0.18em] text-white/42">
+                  Browsing in {presenter.preference.currency}
+                  {presenter.preference.source === 'manual'
+                    ? ' with your saved override'
+                    : presenter.preference.countryCode
+                      ? ` based on ${presenter.preference.countryCode}`
+                      : ' by default'}
                 </p>
 
                 <SearchBar
@@ -194,9 +236,9 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
                 <div className="surface-card-soft rounded-[1.5rem] p-4">
                   <p className="text-[11px] uppercase tracking-[0.18em] text-white/42">Results</p>
-                  <p className="mt-3 text-2xl font-semibold text-white">{filtered.length}</p>
+                  <p className="mt-3 text-2xl font-semibold text-white">{sortedListings.length}</p>
                   <p className="mt-1 text-sm text-white/58">
-                    Listing{filtered.length !== 1 ? 's' : ''} matching this view
+                    Listing{sortedListings.length !== 1 ? 's' : ''} matching this view
                   </p>
                 </div>
                 <div className="surface-card-soft rounded-[1.5rem] p-4">
@@ -328,7 +370,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
             <div className="flex-1">
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-sm text-white/30">
-                  Showing {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                  Showing {sortedListings.length} result{sortedListings.length !== 1 ? 's' : ''}
                   {query ? ` for "${query}"` : ''}
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -351,9 +393,9 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
                 </div>
               </div>
 
-              {filtered.length > 0 ? (
+              {sortedListings.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {filtered.map((listing) => (
+                  {sortedListings.map((listing) => (
                     <ListingCard key={listing.id} listing={listing} />
                   ))}
                 </div>

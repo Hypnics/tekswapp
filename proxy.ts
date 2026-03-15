@@ -1,5 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import {
+  applyDetectedCountryHeader,
+  detectCountryCodeFromHeaders,
+} from '@/lib/currency/request'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -14,6 +18,16 @@ function isConfigured(): boolean {
 }
 
 export async function proxy(request: NextRequest) {
+  const forwardedHeaders = applyDetectedCountryHeader(
+    new Headers(request.headers),
+    detectCountryCodeFromHeaders(request.headers)
+  )
+  const buildForwardResponse = () =>
+    NextResponse.next({
+      request: {
+        headers: new Headers(forwardedHeaders),
+      },
+    })
   const isProtected =
     request.nextUrl.pathname.startsWith('/dashboard') ||
     request.nextUrl.pathname.startsWith('/admin') ||
@@ -28,10 +42,10 @@ export async function proxy(request: NextRequest) {
       url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search)
       return NextResponse.redirect(url)
     }
-    return NextResponse.next({ request })
+    return buildForwardResponse()
   }
 
-  let supabaseResponse = NextResponse.next({ request })
+  let supabaseResponse = buildForwardResponse()
 
   const supabase = createServerClient(supabaseUrl!, supabaseAnonKey!, {
     cookies: {
@@ -40,7 +54,7 @@ export async function proxy(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({ request })
+        supabaseResponse = buildForwardResponse()
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, options)
         )

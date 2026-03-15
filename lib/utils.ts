@@ -1,9 +1,15 @@
-export function formatPrice(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatPrice(amount: number, currency = 'USD', locale = 'en-US'): string {
+  const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
-    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-    maximumFractionDigits: 2,
+  })
+  const { maximumFractionDigits } = formatter.resolvedOptions()
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : maximumFractionDigits,
+    maximumFractionDigits,
   }).format(amount)
 }
 

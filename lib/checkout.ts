@@ -1,11 +1,11 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { DEFAULT_CURRENCY } from '@/lib/currency/config'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { COUNTRY_OPTIONS, getCountryName, isCountryCode } from '@/lib/countries'
 import { formatPrice } from '@/lib/utils'
-import { CurrencyCode, Listing, ShippingMode, ShippingProfile, ShippingRate } from '@/types/listing'
+import { Listing, ShippingMode, ShippingProfile, ShippingRate } from '@/types/listing'
 
-export const DEFAULT_CURRENCY: CurrencyCode = 'USD'
 export const MARKETPLACE_FEE_RATE = 0.05
 export const TECH_PRODUCT_TAX_CODE = 'txcd_99999999'
 export const CHECKOUT_RESERVATION_MINUTES = 30

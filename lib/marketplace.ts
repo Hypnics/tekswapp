@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { normalizeCurrencyCode } from '@/lib/currency/config'
 import { createClient } from '@/lib/supabase/server'
 import {
   MarketplaceFilters,
@@ -8,44 +10,17 @@ import {
   normalizeSortFilter,
   normalizeVerifiedFilter,
 } from '@/lib/marketplace-config'
-import { DEFAULT_CURRENCY, normalizeShippingProfile } from '@/lib/checkout'
-import { normalizeImageSrc } from '@/lib/image-src'
-import { Category, Condition, CurrencyCode, Listing, ShippingMode } from '@/types/listing'
+import { normalizeShippingProfile } from '@/lib/checkout'
+import { normalizeImageList, normalizeImageSrc } from '@/lib/image-src'
+import {
+  Category,
+  Condition,
+  Listing,
+  SellerEditableListing,
+  ShippingMode,
+} from '@/types/listing'
 
 type ListingStatus = 'active' | 'draft' | 'sold' | 'pending_review' | 'paused'
-
-const LISTING_COLUMNS = `
-  id,
-  seller_id,
-  seller_name,
-  seller_verified,
-  seller_rating,
-  seller_total_sales,
-  title,
-  category,
-  brand,
-  model,
-  price,
-  original_price,
-  currency_code,
-  condition,
-  storage,
-  battery_health,
-  color,
-  image,
-  image_url,
-  verified,
-  description,
-  imei_status,
-  seller_notes,
-  device_specs,
-  shipping_mode,
-  shipping_profile,
-  status,
-  views,
-  watchers,
-  created_at
-`
 
 function isConfigured(): boolean {
   return process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https://') ?? false
@@ -69,12 +44,8 @@ function normalizeCategory(value: unknown): Category {
 }
 
 function normalizeCondition(value: unknown): Condition {
+  if (value === 'Poor') return 'Fair'
   return LISTING_CONDITIONS.includes(value as Condition) ? (value as Condition) : 'Good'
-}
-
-function normalizeCurrencyCode(value: unknown): CurrencyCode {
-  if (typeof value === 'string' && value.trim().toUpperCase() === 'USD') return 'USD'
-  return DEFAULT_CURRENCY
 }
 
 function normalizeShippingMode(value: unknown): ShippingMode {
@@ -112,12 +83,17 @@ function normalizeSpecs(value: unknown): Record<string, string> | undefined {
   return Object.keys(pairs).length ? pairs : undefined
 }
 
+function normalizeListingImages(row: Record<string, unknown>): string[] {
+  return normalizeImageList(row.images, row.image, row.image_url)
+}
+
 function mapRowToListing(row: Record<string, unknown>): Listing {
   const fallbackId = crypto.randomUUID()
   const sellerName = asString(row.seller_name, 'TekSwapp Seller')
   const sellerVerified = Boolean(row.seller_verified ?? row.verified)
   const specs = normalizeSpecs(row.device_specs)
-  const image = normalizeImageSrc(row.image, normalizeImageSrc(row.image_url))
+  const images = normalizeListingImages(row)
+  const image = images[0] ?? normalizeImageSrc(row.image, normalizeImageSrc(row.image_url))
 
   return {
     id: asString(row.id, fallbackId),
@@ -132,6 +108,7 @@ function mapRowToListing(row: Record<string, unknown>): Listing {
     batteryHealth: asNumber(row.battery_health, 0) || undefined,
     color: asString(row.color, '') || specs?.color,
     image,
+    images,
     seller: {
       id: asString(row.seller_id, 'unknown-seller'),
       name: sellerName,
@@ -155,6 +132,37 @@ function mapRowToListing(row: Record<string, unknown>): Listing {
   }
 }
 
+function mapRowToEditableListing(
+  row: Record<string, unknown>,
+  privateDetails?: Record<string, unknown> | null
+): SellerEditableListing {
+  const specs = normalizeSpecs(row.device_specs)
+  const images = normalizeListingImages(row)
+
+  return {
+    id: asString(row.id, crypto.randomUUID()),
+    title: asString(row.title, 'Untitled listing'),
+    category: normalizeCategory(row.category),
+    brand: asString(row.brand, 'Unknown'),
+    model: asString(row.model, 'Unknown'),
+    price: asNumber(row.price, 0),
+    originalPrice: asNumber(row.original_price, 0) || undefined,
+    condition: normalizeCondition(row.condition),
+    images,
+    description: asString(row.description, ''),
+    sellerNotes: asString(row.seller_notes, '') || undefined,
+    deviceSpecs: specs,
+    currencyCode: normalizeCurrencyCode(row.currency_code),
+    shippingMode: normalizeShippingMode(row.shipping_mode),
+    shippingProfile: normalizeShippingProfile(row.shipping_profile),
+    status: normalizeListingStatus(row.status),
+    privateIdentifiers: {
+      imei: asString(privateDetails?.imei, '') || undefined,
+      serialNumber: asString(privateDetails?.serial_number, '') || undefined,
+    },
+  }
+}
+
 function isMissingListingsTableError(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false
   const knownCodes = new Set(['PGRST116', 'PGRST205', '42P01'])
@@ -162,6 +170,18 @@ function isMissingListingsTableError(error: { code?: string; message?: string } 
 
   const message = (error.message ?? '').toLowerCase()
   return message.includes("could not find the table 'public.listings'") || message.includes('relation "listings" does not exist')
+}
+
+function isMissingPrivateDetailsTableError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false
+  const knownCodes = new Set(['PGRST116', 'PGRST205', '42P01'])
+  if (error.code && knownCodes.has(error.code)) return true
+
+  const message = (error.message ?? '').toLowerCase()
+  return (
+    message.includes("could not find the table 'public.listing_private_details'") ||
+    message.includes('relation "listing_private_details" does not exist')
+  )
 }
 
 export async function getMarketplaceListings(filters: MarketplaceFilters = {}): Promise<Listing[]> {
@@ -174,7 +194,7 @@ export async function getMarketplaceListings(filters: MarketplaceFilters = {}): 
   const verifiedOnly = normalizeVerifiedFilter(filters.verified)
   const sort = normalizeSortFilter(filters.sort)
 
-  let query = supabase.from('listings').select(LISTING_COLUMNS).eq('status', 'active')
+  let query = supabase.from('listings').select('*').eq('status', 'active')
 
   if (category) query = query.eq('category', category)
   if (condition) query = query.eq('condition', condition)
@@ -187,8 +207,6 @@ export async function getMarketplaceListings(filters: MarketplaceFilters = {}): 
     }
   }
 
-  if (sort === 'price_asc') query = query.order('price', { ascending: true }).order('created_at', { ascending: false })
-  if (sort === 'price_desc') query = query.order('price', { ascending: false }).order('created_at', { ascending: false })
   if (sort === 'most_watched') query = query.order('watchers', { ascending: false }).order('created_at', { ascending: false })
   if (sort === 'newest') query = query.order('created_at', { ascending: false })
 
@@ -205,7 +223,7 @@ export async function getMarketplaceListingById(id: string): Promise<Listing | n
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('listings')
-    .select(LISTING_COLUMNS)
+    .select('*')
     .eq('id', id)
     .maybeSingle()
 
@@ -220,7 +238,7 @@ export async function getFeaturedMarketplaceListings(count = 6): Promise<Listing
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('listings')
-    .select(LISTING_COLUMNS)
+    .select('*')
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(count)
@@ -229,4 +247,38 @@ export async function getFeaturedMarketplaceListings(count = 6): Promise<Listing
   if (error || !data) return []
 
   return (data as Record<string, unknown>[]).map(mapRowToListing)
+}
+
+async function getListingPrivateDetails(
+  supabase: SupabaseClient,
+  listingId: string
+): Promise<Record<string, unknown> | null> {
+  const { data, error } = await supabase
+    .from('listing_private_details')
+    .select('*')
+    .eq('listing_id', listingId)
+    .maybeSingle()
+
+  if (isMissingPrivateDetailsTableError(error)) return null
+  if (error || !data) return null
+  return data as Record<string, unknown>
+}
+
+export async function getSellerEditableListingById(
+  supabase: SupabaseClient,
+  sellerId: string,
+  listingId: string
+): Promise<SellerEditableListing | null> {
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('id', listingId)
+    .eq('seller_id', sellerId)
+    .maybeSingle()
+
+  if (isMissingListingsTableError(error)) return null
+  if (error || !data) return null
+
+  const privateDetails = await getListingPrivateDetails(supabase, listingId)
+  return mapRowToEditableListing(data as Record<string, unknown>, privateDetails)
 }

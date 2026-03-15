@@ -2,9 +2,10 @@
 
 import { redirect } from 'next/navigation'
 import type Stripe from 'stripe'
+import type { CheckoutActionState } from '@/app/checkout/action-state'
+import { DEFAULT_CURRENCY } from '@/lib/currency/config'
 import {
   CHECKOUT_RESERVATION_MINUTES,
-  DEFAULT_CURRENCY,
   MARKETPLACE_FEE_RATE,
   TECH_PRODUCT_TAX_CODE,
   attachStripeSessionToReservation,
@@ -16,15 +17,6 @@ import {
 import { getMarketplaceListingById } from '@/lib/marketplace'
 import { getSiteUrl } from '@/lib/site-url'
 import { stripe } from '@/lib/stripe'
-
-export interface CheckoutActionState {
-  status: 'idle' | 'error'
-  message?: string
-}
-
-export const initialCheckoutActionState: CheckoutActionState = {
-  status: 'idle',
-}
 
 function cleanString(value: FormDataEntryValue | null): string {
   if (typeof value !== 'string') return ''
@@ -95,9 +87,8 @@ export async function startCheckout(
 
     const currency = (listing.currencyCode ?? DEFAULT_CURRENCY).toLowerCase()
     const siteUrl = getSiteUrl()
-    const images = listing.image.startsWith('http://') || listing.image.startsWith('https://')
-      ? [listing.image]
-      : undefined
+    const images = listing.images.filter((image) => image.startsWith('http://') || image.startsWith('https://'))
+    const stripeImages = images.length > 0 ? images.slice(0, 8) : undefined
     const expiresAtDate = new Date(Date.now() + CHECKOUT_RESERVATION_MINUTES * 60 * 1000)
     const expiresAt = Math.floor(expiresAtDate.getTime() / 1000)
 
@@ -152,7 +143,7 @@ export async function startCheckout(
             product_data: {
               name: listing.title,
               description: `${listing.condition} ${listing.brand} ${listing.model}`,
-              images,
+              images: stripeImages,
               tax_code: TECH_PRODUCT_TAX_CODE,
             },
           },

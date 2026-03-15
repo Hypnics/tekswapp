@@ -8,6 +8,8 @@ import {
   hasRequiredSellerFields,
 } from '@/lib/dashboard-data'
 import { getOrCreateProfile } from '@/lib/dashboard-server'
+import { getPrivilegedAccess } from '@/lib/privileged-access'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { ProfileRecord } from '@/types/dashboard'
 
@@ -24,6 +26,14 @@ function cleanString(value: FormDataEntryValue | null): string | null {
   if (typeof value !== 'string') return null
   const trimmed = value.trim()
   return trimmed.length ? trimmed : null
+}
+
+function readListingId(formData: FormData): string {
+  const listingId = cleanString(formData.get('listing_id'))
+  if (!listingId) {
+    throw new Error('Missing listing id.')
+  }
+  return listingId
 }
 
 function buildVerificationErrorRedirect(message: string): string {
@@ -87,6 +97,60 @@ async function getAuthedContext() {
   if (!user) redirect('/auth')
 
   return { supabase, user }
+}
+
+function getModerationClient(fallbackClient: SupabaseClient) {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https://') && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return createAdminClient()
+  }
+
+  return fallbackClient
+}
+
+async function requireModerationContext() {
+  const { supabase, user } = await getAuthedContext()
+  const access = await getPrivilegedAccess(supabase, user)
+
+  if (!access.canReviewListings) {
+    throw new Error('Owner or staff access is required for listing review.')
+  }
+
+  return {
+    supabase,
+    user,
+    access,
+  }
+}
+
+async function updatePendingListingStatus(
+  listingId: string,
+  status: 'active' | 'draft'
+) {
+  const { supabase } = await requireModerationContext()
+  const moderationClient = getModerationClient(supabase)
+  const { data, error } = await moderationClient
+    .from('listings')
+    .update({ status })
+    .eq('id', listingId)
+    .eq('status', 'pending_review')
+    .select('id')
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(`Could not update listing review status: ${error.message}`)
+  }
+
+  if (!data) {
+    throw new Error('Listing was not updated. It may no longer be pending review.')
+  }
+
+  revalidatePath('/')
+  revalidatePath('/listings')
+  revalidatePath('/dashboard')
+  revalidatePath('/sell')
+  revalidatePath('/admin')
+  revalidatePath('/staff')
+  revalidatePath(`/product/${listingId}`)
 }
 
 function getMissingVerificationRequirements(profile: ProfileRecord): string[] {
@@ -358,4 +422,14 @@ export async function resendVerificationEmail() {
   }
 
   redirect(`/dashboard?tab=verification&saved=email_sent&t=${Date.now().toString()}`)
+}
+
+export async function approvePendingListingFromDashboard(formData: FormData) {
+  const listingId = readListingId(formData)
+  await updatePendingListingStatus(listingId, 'active')
+}
+
+export async function rejectPendingListingFromDashboard(formData: FormData) {
+  const listingId = readListingId(formData)
+  await updatePendingListingStatus(listingId, 'draft')
 }

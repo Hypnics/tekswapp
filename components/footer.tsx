@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import BrandMark from '@/components/brand-mark'
+import CurrencySwitcher from '@/components/currency/currency-switcher'
 
 const links = {
   Marketplace: [
@@ -53,9 +54,17 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-white/8 pt-6 text-xs text-white/46 sm:flex-row sm:items-center sm:justify-between">
-          <p>Copyright {new Date().getFullYear()} TekSwapp. All rights reserved.</p>
-          <p>Phones, laptops, tablets, consoles, wearables, and audio gear.</p>
+        <div className="border-t border-white/8 pt-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-2 text-xs text-white/46">
+              <p>Copyright {new Date().getFullYear()} TekSwapp. All rights reserved.</p>
+              <p>Phones, laptops, tablets, consoles, wearables, and audio gear.</p>
+            </div>
+
+            <div className="w-full max-w-xl">
+              <CurrencySwitcher />
+            </div>
+          </div>
         </div>
       </div>
     </footer>

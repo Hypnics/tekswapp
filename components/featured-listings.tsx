@@ -1,9 +1,14 @@
 import Link from 'next/link'
 import ListingCard from '@/components/listing-card'
+import { attachPriceDisplays, getCurrencyPresenter } from '@/lib/currency/presenter'
 import { getFeaturedMarketplaceListings } from '@/lib/marketplace'
 
 export default async function FeaturedListings() {
-  const listings = await getFeaturedMarketplaceListings(6)
+  const [listings, presenter] = await Promise.all([
+    getFeaturedMarketplaceListings(6),
+    getCurrencyPresenter(),
+  ])
+  const pricedListings = listings.map((listing) => attachPriceDisplays(listing, presenter))
 
   return (
     <section className="px-4 pb-20">
@@ -24,9 +29,9 @@ export default async function FeaturedListings() {
           </Link>
         </div>
 
-        {listings.length > 0 ? (
+        {pricedListings.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {listings.map((listing) => (
+            {pricedListings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>

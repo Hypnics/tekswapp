@@ -3,14 +3,18 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useActionState, useMemo, useState } from 'react'
-import { initialCheckoutActionState, startCheckout } from '@/app/checkout/actions'
-import { formatPrice } from '@/lib/utils'
+import { initialCheckoutActionState } from '@/app/checkout/action-state'
+import { startCheckout } from '@/app/checkout/actions'
+import PriceDisplay from '@/components/currency/price-display'
+import type { MoneyDisplay } from '@/lib/currency/presenter'
 
 interface ShippingChoice {
   code: string
   name: string
   amount: number
   label: string
+  priceDisplay: MoneyDisplay
+  estimatedTotalDisplay: MoneyDisplay
 }
 
 interface CheckoutExperienceProps {
@@ -18,17 +22,19 @@ interface CheckoutExperienceProps {
     id: string
     title: string
     image: string
-    price: number
     condition: string
     category: string
     brand: string
     model: string
     sellerName: string
-    currencyCode: string
+    priceDisplay: MoneyDisplay
   }
   buyerEmail: string
   shippingChoices: ShippingChoice[]
   cancelled: boolean
+  defaultShippingCountry: string
+  checkoutCurrencyNote: string
+  activeCurrency: string
 }
 
 export default function CheckoutExperience({
@@ -36,16 +42,19 @@ export default function CheckoutExperience({
   buyerEmail,
   shippingChoices,
   cancelled,
+  defaultShippingCountry,
+  checkoutCurrencyNote,
+  activeCurrency,
 }: CheckoutExperienceProps) {
   const [state, formAction, pending] = useActionState(startCheckout, initialCheckoutActionState)
-  const [selectedCountry, setSelectedCountry] = useState(shippingChoices[0]?.code ?? '')
+  const [selectedCountry, setSelectedCountry] = useState(defaultShippingCountry || shippingChoices[0]?.code || '')
 
   const selectedChoice = useMemo(
     () => shippingChoices.find((choice) => choice.code === selectedCountry) ?? shippingChoices[0],
     [selectedCountry, shippingChoices]
   )
 
-  const estimatedBeforeTax = listing.price + (selectedChoice?.amount ?? 0)
+  const estimatedBeforeTaxDisplay = selectedChoice?.estimatedTotalDisplay ?? listing.priceDisplay
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -97,7 +106,11 @@ export default function CheckoutExperience({
             {selectedChoice && (
               <div className="mt-4 rounded-[1.3rem] border border-[#67F2FF]/18 bg-[#67F2FF]/7 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#67F2FF]">Seller shipping for {selectedChoice.name}</p>
-                <p className="mt-2 text-lg font-semibold text-white">{formatPrice(selectedChoice.amount, listing.currencyCode)}</p>
+                <PriceDisplay
+                  money={selectedChoice.priceDisplay}
+                  amountClassName="mt-2 text-lg font-semibold text-white"
+                  metaClassName="mt-1 text-xs text-white/48"
+                />
                 <p className="mt-1 text-sm text-white/62">{selectedChoice.label}</p>
               </div>
             )}
@@ -125,7 +138,7 @@ export default function CheckoutExperience({
           </button>
 
           <p className="text-xs text-white/48">
-            Need a different destination? Change it here before paying. Stripe will only accept addresses in the selected country for this session.
+            {checkoutCurrencyNote}
           </p>
         </form>
       </section>
@@ -149,11 +162,11 @@ export default function CheckoutExperience({
         <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-5">
           <div className="flex items-center justify-between text-sm text-white/70">
             <span>Item</span>
-            <span>{formatPrice(listing.price, listing.currencyCode)}</span>
+            <span>{listing.priceDisplay.formatted}</span>
           </div>
           <div className="mt-3 flex items-center justify-between text-sm text-white/70">
             <span>Shipping</span>
-            <span>{selectedChoice ? formatPrice(selectedChoice.amount, listing.currencyCode) : 'Select country'}</span>
+            <span>{selectedChoice ? selectedChoice.priceDisplay.formatted : 'Select country'}</span>
           </div>
           <div className="mt-3 flex items-center justify-between text-sm text-white/50">
             <span>Tax</span>
@@ -162,11 +175,17 @@ export default function CheckoutExperience({
           <div className="mt-4 border-t border-white/10 pt-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-white">Estimated before tax</span>
-              <span className="text-xl font-semibold text-white">{formatPrice(estimatedBeforeTax, listing.currencyCode)}</span>
+              <span className="text-xl font-semibold text-white">{estimatedBeforeTaxDisplay.formatted}</span>
             </div>
-            <p className="mt-2 text-xs text-white/48">
-              Stripe may present the final total in your local currency at payment if supported for your region.
-            </p>
+            {estimatedBeforeTaxDisplay.isConverted ? (
+              <p className="mt-2 text-xs text-white/48">
+                Approximate browse total. Seller base amount before tax is {selectedChoice ? selectedChoice.estimatedTotalDisplay.baseFormatted : listing.priceDisplay.baseFormatted}.
+              </p>
+            ) : (
+              <p className="mt-2 text-xs text-white/48">
+                Stripe may present the final total in your local currency at payment if supported for your region.
+              </p>
+            )}
           </div>
         </div>
 
@@ -174,7 +193,7 @@ export default function CheckoutExperience({
           <Link href={`/product/${listing.id}`} className="rounded-full border border-white/10 px-3 py-2 text-white/74 hover:text-white">
             Back to listing
           </Link>
-          <span>Powered by Stripe</span>
+          <span>Browsing in {activeCurrency} / Powered by Stripe</span>
         </div>
       </aside>
     </div>

@@ -24,6 +24,7 @@ type OwnerListingRow = {
   condition: string
   status: ListingStatus
   price: number
+  currency_code: string | null
   image: string | null
   image_url: string | null
   seller_name: string
@@ -47,7 +48,7 @@ type AccessAccountRow = {
 }
 
 const LISTING_COLUMNS =
-  'id,title,category,condition,status,price,image,image_url,seller_name,seller_id,created_at,updated_at'
+  'id,title,category,condition,status,price,currency_code,image,image_url,seller_name,seller_id,created_at,updated_at'
 const PROFILE_COLUMNS = 'id,full_name,verification_status,seller_enabled,updated_at'
 
 export const metadata: Metadata = {
@@ -355,7 +356,7 @@ export default async function AdminPage() {
                           <div>
                             <h3 className="text-base font-semibold text-white">{listing.title}</h3>
                             <p className="mt-1 text-sm text-white/65">
-                              {listing.category} · {listing.condition} · {formatPrice(listing.price, 'USD')}
+                              {listing.category} · {listing.condition} · {formatPrice(listing.price, listing.currency_code ?? 'USD')}
                             </p>
                           </div>
                           <p className="text-xs text-white/55">
@@ -422,7 +423,7 @@ export default async function AdminPage() {
                         <p className="text-xs text-white/55">{listing.category}</p>
                       </td>
                       <td className="py-3 pr-4 text-white/70">{listing.seller_name}</td>
-                      <td className="py-3 pr-4 text-white/80">{formatPrice(listing.price, 'USD')}</td>
+                      <td className="py-3 pr-4 text-white/80">{formatPrice(listing.price, listing.currency_code ?? 'USD')}</td>
                       <td className={`py-3 pr-4 font-semibold ${statusTone(listing.status)}`}>{listing.status}</td>
                       <td className="py-3 pr-4 text-white/65">{formatDate(listing.updated_at)}</td>
                       <td className="py-3">

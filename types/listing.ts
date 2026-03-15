@@ -1,5 +1,13 @@
-export type Condition = 'New' | 'Like New' | 'Good' | 'Fair' | 'Poor'
-export type CurrencyCode = 'USD'
+import type { SupportedCurrencyCode } from '@/lib/currency/config'
+
+export type Condition =
+  | 'New'
+  | 'Like New'
+  | 'Excellent'
+  | 'Good'
+  | 'Fair'
+  | 'For Parts / Not Working'
+export type CurrencyCode = SupportedCurrencyCode
 export type ShippingMode = 'none' | 'basic' | 'advanced'
 
 export type Category =
@@ -41,6 +49,11 @@ export interface ShippingProfile {
   advancedRates?: ShippingRate[]
 }
 
+export interface ListingPrivateIdentifiers {
+  imei?: string
+  serialNumber?: string
+}
+
 export interface Listing {
   id: string
   title: string
@@ -54,6 +67,7 @@ export interface Listing {
   batteryHealth?: number
   color?: string
   image: string
+  images: string[]
   seller: Seller
   verified: boolean
   description: string
@@ -67,4 +81,24 @@ export interface Listing {
   currencyCode: CurrencyCode
   shippingMode: ShippingMode
   shippingProfile?: ShippingProfile
+}
+
+export interface SellerEditableListing {
+  id: string
+  title: string
+  category: Category
+  brand: string
+  model: string
+  price: number
+  originalPrice?: number
+  condition: Condition
+  images: string[]
+  description: string
+  sellerNotes?: string
+  deviceSpecs?: Record<string, string>
+  currencyCode: CurrencyCode
+  shippingMode: ShippingMode
+  shippingProfile?: ShippingProfile
+  status?: Listing['status']
+  privateIdentifiers?: ListingPrivateIdentifiers
 }

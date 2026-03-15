@@ -1,3 +1,4 @@
+import PriceDisplay from '@/components/currency/price-display'
 import {
   canUserPublishListings,
   getListingCountByStatus,
@@ -76,6 +77,15 @@ export default function OverviewPanel({
   ]
 
   const focusItems: FocusItem[] = []
+
+  if (snapshot.privilegedAccess.canReviewListings && snapshot.moderationSummary.pendingReview > 0) {
+    focusItems.push({
+      title: 'Review submitted listings',
+      detail: `${snapshot.moderationSummary.pendingReview} listing${snapshot.moderationSummary.pendingReview === 1 ? '' : 's'} are waiting for owner or staff approval.`,
+      action: 'Open review queue',
+      section: 'moderation',
+    })
+  }
 
   if (!snapshot.emailVerified) {
     focusItems.push({
@@ -306,7 +316,15 @@ export default function OverviewPanel({
                       <p className="text-sm font-semibold text-white">
                         {listing.views} views / {listing.watchers} watchers
                       </p>
-                      <p className="mt-1 text-xs text-white/55">{formatPrice(listing.price, 'USD')}</p>
+                      {listing.priceDisplay ? (
+                        <PriceDisplay
+                          money={listing.priceDisplay}
+                          amountClassName="mt-1 text-xs text-white/55"
+                          metaClassName="mt-1 text-[11px] text-white/42"
+                        />
+                      ) : (
+                        <p className="mt-1 text-xs text-white/55">{formatPrice(listing.price, listing.currencyCode)}</p>
+                      )}
                     </div>
                   </div>
                 </div>

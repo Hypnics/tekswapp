@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import PriceDisplay from '@/components/currency/price-display'
 import EmptyState from '@/components/dashboard/empty-state'
 import { formatDate, formatPrice } from '@/lib/utils'
 import { DashboardListing } from '@/types/dashboard'
@@ -62,9 +63,16 @@ export default function ListingsPanel({ listings, canPublish, onRequireVerificat
     [filteredListings]
   )
   const inventoryValue = useMemo(
-    () => filteredListings.reduce((total, listing) => total + listing.price, 0),
+    () =>
+      filteredListings.reduce(
+        (total, listing) => total + (listing.priceDisplay?.displayAmount ?? listing.price),
+        0
+      ),
     [filteredListings]
   )
+  const inventoryValueCurrency =
+    filteredListings[0]?.priceDisplay?.displayCurrency ?? filteredListings[0]?.currencyCode ?? 'USD'
+  const inventoryValueLocale = filteredListings[0]?.priceDisplay?.locale ?? 'en-US'
 
   return (
     <div className="space-y-5">
@@ -125,7 +133,9 @@ export default function ListingsPanel({ listings, canPublish, onRequireVerificat
           </div>
           <div className="dashboard-panel-soft rounded-2xl px-4 py-4">
             <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/46">Inventory value</p>
-            <p className="mt-2 text-2xl font-semibold text-white">{formatPrice(inventoryValue, 'USD')}</p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {formatPrice(inventoryValue, inventoryValueCurrency, inventoryValueLocale)}
+            </p>
             <p className="mt-1 text-sm text-white/62">Based on visible items in this tab</p>
           </div>
         </div>
@@ -176,7 +186,15 @@ export default function ListingsPanel({ listings, canPublish, onRequireVerificat
                     </td>
                     <td className="px-3 py-3 text-sm text-white/72">{listing.condition}</td>
                     <td className="px-3 py-3 text-sm font-semibold text-white">
-                      {formatPrice(listing.price, 'USD')}
+                      {listing.priceDisplay ? (
+                        <PriceDisplay
+                          money={listing.priceDisplay}
+                          amountClassName="text-sm font-semibold text-white"
+                          metaClassName="mt-1 text-[11px] text-white/48"
+                        />
+                      ) : (
+                        formatPrice(listing.price, listing.currencyCode)
+                      )}
                     </td>
                     <td className="px-3 py-3 text-sm text-white/65">
                       {listing.views} views / {listing.watchers} watchers
@@ -185,14 +203,24 @@ export default function ListingsPanel({ listings, canPublish, onRequireVerificat
                     <td className="rounded-r-2xl px-3 py-3">
                       <div className="flex flex-wrap gap-2">
                         {mapActions(activeTab).map((action) => (
-                          <button
-                            key={`${listing.id}-${action}`}
-                            type="button"
-                            onClick={action === 'Publish' && !canPublish ? onRequireVerification : undefined}
-                            className="rounded-lg border border-white/16 px-2.5 py-1.5 text-xs font-semibold text-white/82 transition hover:bg-white/6"
-                          >
-                            {action}
-                          </button>
+                          action === 'Edit' ? (
+                            <Link
+                              key={`${listing.id}-${action}`}
+                              href={`/sell?edit=${listing.id}`}
+                              className="rounded-lg border border-white/16 px-2.5 py-1.5 text-xs font-semibold text-white/82 transition hover:bg-white/6"
+                            >
+                              Edit
+                            </Link>
+                          ) : (
+                            <button
+                              key={`${listing.id}-${action}`}
+                              type="button"
+                              onClick={action === 'Publish' && !canPublish ? onRequireVerification : undefined}
+                              className="rounded-lg border border-white/16 px-2.5 py-1.5 text-xs font-semibold text-white/82 transition hover:bg-white/6"
+                            >
+                              {action}
+                            </button>
+                          )
                         ))}
                       </div>
                     </td>
